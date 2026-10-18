@@ -25,6 +25,7 @@ npx http-server -p 8080 .
 - 車や落石スレスレをすり抜けると「ギリギリ！」ボーナス（+0.5秒）
 - 衝突・落石で転倒するとタイムロス、崖やガードレールにこすると減速
 - 結果画面から X / LINE / Facebook / 端末の共有機能でシェア、結果画像の保存も可能
+  （シェアURLは `js/game.js` の `SHARE_URL`：https://techgym.jp/column/claude-code-game-kokudo168/ ）
 
 ## コース（8区間）
 

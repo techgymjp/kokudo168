@@ -992,7 +992,8 @@
   }
 
   // ---------------------------------------------------------------- シェア
-  function shareUrl() { return /^https?:/.test(location.protocol) ? location.href.split('#')[0].split('?')[0] : ''; }
+  const SHARE_URL = 'https://techgym.jp/column/claude-code-game-kokudo168/';
+  function shareUrl() { return SHARE_URL; }
   function shareText() {
     const r = G.result;
     if (!r) return '';
@@ -1150,7 +1151,6 @@
     $('shareImg').addEventListener('click', saveImage);
     const ns = $('shareNative');
     if (navigator.share) ns.addEventListener('click', nativeShare); else ns.hidden = true;
-    if (!shareUrl()) $('shareFb').hidden = true;
     const mute = $('btnMute');
     const upd = () => { mute.textContent = Sound.muted ? '🔇' : '🔊'; };
     upd();
