@@ -490,6 +490,21 @@
       if (!seg.hidden) maxy = Math.min(maxy, seg.p2.screen.y);
       visible.push(seg);
     }
+    // 車・落石を所属セグメントへ振り分け（z の遠い順に描くため降順ソート）
+    for (const seg of visible) { seg.cars.length = 0; seg.rocks.length = 0; }
+    const first = baseSeg.index, last = first + DRAW - 1;
+    for (const c of G.cars) {
+      const i = Math.floor(c.z / SEG);
+      if (i >= first && i <= last && i < segments.length) segments[i].cars.push(c);
+    }
+    for (const r of G.rocks) {
+      const i = Math.floor(r.z / SEG);
+      if (i >= first && i <= last && i < segments.length) segments[i].rocks.push(r);
+    }
+    for (const seg of visible) {
+      if (seg.cars.length > 1) seg.cars.sort((a, b) => b.z - a.z);
+      if (seg.rocks.length > 1) seg.rocks.sort((a, b) => b.z - a.z);
+    }
     // 2パス目：奥から手前へ
     for (let n = visible.length - 1; n >= 0; n--) {
       const seg = visible[n];

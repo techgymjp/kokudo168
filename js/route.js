@@ -7,14 +7,14 @@ const Route = (() => {
 
   // 実際のキロ程（おおよそ）と区間
   const STAGES = [
-    { name: '枚方市・交野市', short: '枚方', km: [0, 14], traffic: [4, 3] },
-    { name: '生駒市・平群町・王寺町', short: '生駒', km: [14, 30], traffic: [4, 3] },
-    { name: '香芝市 → 五條市', short: '香芝', km: [30, 58], traffic: [5, 3] },
-    { name: '天辻峠・大塔', short: '五條', km: [58, 90], traffic: [3, 3] },
-    { name: '十津川村', short: '十津川', km: [90, 124], traffic: [3, 3] },
-    { name: '十津川温泉・果無', short: '十津川温泉', km: [124, 146], traffic: [3, 3] },
-    { name: '熊野本宮', short: '本宮', km: [146, 157], traffic: [4, 3] },
-    { name: '熊野川 → 新宮市', short: '新宮', km: [157, 180], traffic: [4, 3] },
+    { name: '枚方市・交野市', short: '枚方', km: [0, 14], traffic: [6, 4] },
+    { name: '生駒市・平群町・王寺町', short: '生駒', km: [14, 30], traffic: [6, 4] },
+    { name: '香芝市 → 五條市', short: '香芝', km: [30, 58], traffic: [7, 4] },
+    { name: '天辻峠・大塔', short: '五條', km: [58, 90], traffic: [5, 4] },
+    { name: '十津川村', short: '十津川', km: [90, 124], traffic: [5, 4] },
+    { name: '十津川温泉・果無', short: '十津川温泉', km: [124, 146], traffic: [5, 4] },
+    { name: '熊野本宮', short: '本宮', km: [146, 157], traffic: [6, 4] },
+    { name: '熊野川 → 新宮市', short: '新宮', km: [157, 180], traffic: [6, 4] },
   ];
   const TOTAL_KM = 180;
   // 標高プロファイル（km, m）おおよその値
