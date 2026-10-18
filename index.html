@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>酷道168号の星</title>
+<meta name="description" content="国道168号を枚方市から新宮市まで約180km、バイクで疾走せよ！ とろとろ走る車を追い抜き、ギリギリの対向車と落石をかわして熊野へ。">
+<meta property="og:title" content="酷道168号の星">
+<meta property="og:description" content="国道168号 枚方→新宮 約180kmを駆け抜けるバイクレースゲーム。狭路・対向車・落石を越えて熊野本宮大社の大鳥居へ！">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#1b2a4a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M8 8h84q4 52-42 86Q4 60 8 8z' fill='%231f4fa8' stroke='%23fff' stroke-width='5'/%3E%3Ctext x='50' y='56' font-size='34' text-anchor='middle' fill='%23fff' font-family='sans-serif' font-weight='900'%3E168%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div id="hud" hidden>
+  <div class="hud-top">
+    <div id="hudTimeBox" class="hud-box hud-time"><span class="lbl">TIME</span><span id="hudTime">0</span></div>
+    <div class="hud-box hud-center">
+      <div id="hudStage">枚方市・交野市</div>
+      <div class="hud-sub"><span id="hudKm">0.0 km</span> / 180 km　<span id="hudAlt">標高 15m</span></div>
+    </div>
+    <div class="hud-box hud-speed"><span id="hudSpeed">0</span><small>km/h</small></div>
+  </div>
+  <div class="hud-stats">追い抜き <b id="hudOver">0</b>　ギリギリ <b id="hudNear">0</b></div>
+  <div class="hud-progress">
+    <canvas id="hudProfile"></canvas>
+    <div id="hudBar"><div class="line"></div><div id="hudMarker">🏍</div></div>
+  </div>
+</div>
+<div id="msg"></div>
+<div id="toast"></div>
+
+<!-- タッチ操作 -->
+<div id="touch" hidden>
+  <div class="tpad tleft">
+    <button data-key="left" aria-label="左">◀</button>
+    <button data-key="right" aria-label="右">▶</button>
+  </div>
+  <div class="tpad tright">
+    <button data-key="brake" class="brake">ブレーキ</button>
+    <button data-key="accel" class="accel">アクセル</button>
+  </div>
+</div>
+<button id="btnMute" class="corner-btn" aria-label="サウンド切替">🔊</button>
+<button id="btnPause" class="corner-btn pause-btn" aria-label="一時停止" hidden>❚❚</button>
+
+<!-- タイトル -->
+<section id="title" class="overlay" hidden>
+  <div class="title-wrap">
+    <div class="logo">
+      <span class="logo-koku">酷道</span><span class="shield">168</span><span class="logo-go">号の星</span>
+    </div>
+    <p class="tagline">枚方市 → 新宮市　約180km　激走バイクツーリング</p>
+    <p class="lead">
+      国道168号――人呼んで“酷道”。<br>
+      大阪・枚方から奈良の山々を越え、熊野・新宮まで一気に駆け抜けろ！<br>
+      とろとろ走る車を追い抜き、ギリギリを攻める対向車と落石をかわし、<br class="pc">
+      熊野本宮大社の大鳥居を目指せ。
+    </p>
+    <div class="btns">
+      <button id="btnStart" class="btn primary">走り出す</button>
+      <button id="btnHowto" class="btn">遊び方</button>
+    </div>
+    <p id="best" class="best"></p>
+    <p class="rotate-hint">📱 横画面にするともっと走りやすい！</p>
+  </div>
+</section>
+
+<section id="howto" class="overlay" hidden>
+  <div class="panel">
+    <h2>遊び方</h2>
+    <table class="keys">
+      <tr><th>← →</th><td>ハンドル（A / D でもOK）</td></tr>
+      <tr><th>↑ / Space</th><td>アクセル（W / Z でもOK）</td></tr>
+      <tr><th>↓</th><td>ブレーキ（S / X でもOK）</td></tr>
+      <tr><th>Esc / P</th><td>一時停止</td></tr>
+    </table>
+    <p class="note">スマホは画面下のボタンで操作できます。</p>
+    <ul>
+      <li>持ち時間がなくなる前に<b>チェックポイント</b>を通過すると時間が延長されます。</li>
+      <li>日本は左側通行。<b>とろとろ走る車</b>は対向車線にはみ出して追い抜こう。</li>
+      <li>対向車や車スレスレをすり抜けると<b>「ギリギリ！」</b>ボーナス（+0.5秒）。</li>
+      <li>狭い“酷道”区間では対向車がセンターを越えて攻めてきます。</li>
+      <li><b>落石</b>は崖側から降ってきます。影をよく見てかわせ！</li>
+      <li>崖やガードレールにこするとガリガリ減速。衝突すると転倒してタイムロス。</li>
+      <li>急カーブはスピードを出しすぎると外へ膨らみます。</li>
+    </ul>
+    <button id="btnHowtoClose" class="btn primary">OK</button>
+  </div>
+</section>
+
+<section id="pause" class="overlay" hidden>
+  <div class="panel small">
+    <h2>一時停止</h2>
+    <div class="btns col">
+      <button id="btnResume" class="btn primary">再開する</button>
+      <button id="btnQuit" class="btn">タイトルへ</button>
+    </div>
+  </div>
+</section>
+
+<!-- 結果 -->
+<section id="result" class="overlay" hidden>
+  <div class="panel result">
+    <p id="resHead" class="res-head"></p>
+    <div class="res-main">
+      <div id="resRank" class="rank">S</div>
+      <div>
+        <div id="resTitle" class="res-title"></div>
+        <div class="res-big"><span id="resTimeLbl">タイム</span><b id="resTime"></b></div>
+        <div class="res-big"><span>SCORE</span><b id="resScore"></b></div>
+        <p id="resBest" class="res-best" hidden>★ 自己ベスト更新！</p>
+      </div>
+    </div>
+    <dl class="res-stats">
+      <div><dt>追い抜き</dt><dd id="resOver"></dd></div>
+      <div><dt>ギリギリ</dt><dd id="resNear"></dd></div>
+      <div><dt>転倒</dt><dd id="resCrash"></dd></div>
+      <div><dt>最高速</dt><dd id="resTop"></dd></div>
+    </dl>
+    <canvas id="resCard" class="res-card" aria-label="結果画像"></canvas>
+    <div class="share">
+      <p>結果をシェア</p>
+      <div class="share-btns">
+        <button id="shareX" class="sbtn x">𝕏 ポスト</button>
+        <button id="shareLine" class="sbtn line">LINE</button>
+        <button id="shareFb" class="sbtn fb">Facebook</button>
+        <button id="shareNative" class="sbtn native">共有…</button>
+        <button id="shareCopy" class="sbtn copy">テキストをコピー</button>
+        <button id="shareImg" class="sbtn img">画像を保存</button>
+      </div>
+      <span id="copied" class="copied"></span>
+    </div>
+    <div class="btns">
+      <button id="btnRetry" class="btn primary">もう一度走る</button>
+      <button id="btnTitle" class="btn">タイトルへ</button>
+    </div>
+  </div>
+</section>
+
+<div id="loading">読み込み中…</div>
+
+<script src="js/audio.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/route.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
