@@ -61,6 +61,8 @@ npx http-server -p 8080 .
 https://github.com/techgymjp/kokudo168/releases/latest/download/kokudo168.apk
 ```
 
+スマホで読み取る用の QR コード：`docs/apk-qr.png`
+
 リポジトリの Secrets に署名鍵（`ANDROID_KEYSTORE_BASE64` など 4 つ）を登録すると、Google Play 用の署名付き AAB（本番広告）も Artifact に出力されます。
 
 手元でビルドする場合：
