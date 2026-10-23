@@ -195,3 +195,15 @@ body.portrait .pc { display: none; }
   .lead { margin-bottom: 10px; line-height: 1.5; }
   .btn { padding: 10px 22px; }
 }
+
+/* ---------- Android アプリ ---------- */
+.legal { margin-top: 10px; font-size: 13px; color: #c9d3e6; text-shadow: 0 2px 4px #000; }
+.legal a { color: #c9d3e6; text-decoration: underline; padding: 6px 4px; }
+#buildInfo { margin-right: 10px; opacity: .8; }
+.keys-app { display: none; }
+body.native .keys-app { display: table; }
+body.native .keys-pc { display: none; }
+body.native .rotate-hint { display: none; }
+.cont-lead { margin: 0 0 6px; }
+.cont-count { font-family: var(--title); font-size: 56px; color: var(--accent); margin-bottom: 10px; }
+@media (max-height: 500px) { .legal { margin-top: 4px; font-size: 12px; } .cont-count { font-size: 40px; margin-bottom: 4px; } }

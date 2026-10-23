@@ -72,6 +72,11 @@
       <button id="btnHowto" class="btn">遊び方</button>
     </div>
     <p id="best" class="best"></p>
+    <p class="legal">
+      <span id="buildInfo"></span>
+      <a href="https://techgym.jp/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>
+      <span id="adPrivacy" hidden>｜<a href="#" id="adPrivacyLink">広告の設定</a></span>
+    </p>
     <p class="rotate-hint">📱 横画面にするともっと走りやすい！</p>
   </div>
 </section>
@@ -79,13 +84,19 @@
 <section id="howto" class="overlay" hidden>
   <div class="panel">
     <h2>遊び方</h2>
-    <table class="keys">
+    <table class="keys keys-pc">
       <tr><th>← →</th><td>ハンドル（A / D でもOK）</td></tr>
       <tr><th>↑ / Space</th><td>アクセル（W / Z でもOK）</td></tr>
       <tr><th>↓</th><td>ブレーキ（S / X でもOK）</td></tr>
       <tr><th>Esc / P</th><td>一時停止</td></tr>
     </table>
-    <p class="note">スマホは画面下のボタンで操作できます。</p>
+    <p class="note keys-pc">スマホは画面下のボタンで操作できます。</p>
+    <table class="keys keys-app">
+      <tr><th>◀ ▶</th><td>ハンドル</td></tr>
+      <tr><th>アクセル</th><td>加速（押しっぱなし）</td></tr>
+      <tr><th>ブレーキ</th><td>減速</td></tr>
+      <tr><th>❚❚ / 戻る</th><td>一時停止</td></tr>
+    </table>
     <ul>
       <li>持ち時間がなくなる前に<b>チェックポイント</b>を通過すると時間が延長されます。</li>
       <li>日本は左側通行。<b>とろとろ走る車</b>は対向車線にはみ出して追い抜こう。</li>
@@ -106,6 +117,20 @@
       <button id="btnResume" class="btn primary">再開する</button>
       <button id="btnQuit" class="btn">タイトルへ</button>
     </div>
+  </div>
+</section>
+
+<!-- 続行（リワード広告・Android アプリのみ） -->
+<section id="continue" class="overlay" hidden>
+  <div class="panel small">
+    <h2>TIME UP</h2>
+    <p class="cont-lead">広告を見て <b>+20秒</b> で続行しますか？</p>
+    <div id="contCount" class="cont-count">10</div>
+    <div class="btns col">
+      <button id="contWatch" class="btn primary">広告を見て続行</button>
+      <button id="contGiveUp" class="btn">あきらめる</button>
+    </div>
+    <p id="contNote" class="note"></p>
   </div>
 </section>
 
@@ -150,7 +175,10 @@
 
 <div id="loading">読み込み中…</div>
 
+<script src="js/build-info.js"></script>
+<script src="js/ads-config.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/ads.js"></script>
 <script src="js/sprites.js"></script>
 <script src="js/route.js"></script>
 <script src="js/game.js"></script>

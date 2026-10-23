@@ -2,6 +2,9 @@
 // 酷道168号の星 — 疑似3Dレースエンジン & ゲームロジック
 (() => {
   const $ = (id) => document.getElementById(id);
+  // Android アプリ（Capacitor）で動いているか
+  const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  const plugin = name => (NATIVE && window.Capacitor.Plugins ? window.Capacitor.Plugins[name] : null);
   const canvas = $('game');
   const ctx = canvas.getContext('2d');
 
@@ -722,6 +725,7 @@
       if (p.life <= 0) G.particles.splice(i, 1);
     }
     if (G.mode === 'title') { attract(dt); return; }
+    if (G.mode === 'continue') { updateContinue(dt); Sound.engine(0, false); return; }
     if (G.mode === 'paused' || G.mode === 'result' || G.mode === 'loading') { Sound.engine(0, false); return; }
 
     const pz = G.position + PLAYER_Z;
@@ -916,7 +920,7 @@
     G.time = track.stages[0].bonus; G.elapsed = 0; G.stage = 0;
     G.crash = 0; G.invul = 0; G.shake = 0; G.flash = 0;
     G.overtakes = 0; G.nearMiss = 0; G.crashes = 0; G.rockFalls = 0; G.topSpeed = 0; G.score = 0;
-    G.lastSeg = 0; G.skyOffset = 0; G.particles.length = 0; G.result = null;
+    G.lastSeg = 0; G.skyOffset = 0; G.particles.length = 0; G.result = null; G.continued = false;
     G.theme = 'city'; G.themePrev = null; G.themeFade = 1;
     initTraffic(); initRocks();
   }
@@ -925,13 +929,14 @@
     resetRun();
     hideAll();
     $('hud').hidden = false;
-    if (isTouch()) $('touch').hidden = false;
+    if (isTouch() || NATIVE) $('touch').hidden = false;
     $('btnPause').hidden = false;
     G.mode = 'countdown';
     G.countdown = 3.2;
     toast('枚方市', '国道168号の起点。目指すは約180km先の新宮市！');
   }
   function finish(goal) {
+    if (!goal && canContinue()) { showContinue(); return; }
     G.result = makeResult(goal);
     if (!goal) {
       showMsg('TIME UP<small>力尽きた…</small>', 'crash', 2500);
@@ -939,6 +944,58 @@
       G.goalTimer = 0.8;
     }
   }
+  // ---------------------------------------------------------------- リワード広告で続行（Android アプリのみ）
+  // 時間切れのとき、1 ゲーム 1 回だけ「広告を見て +20 秒」を提案する。10 秒で自動的にあきらめる
+  const CONTINUE_SEC = 20;
+  let contBusy = false;
+  function canContinue() { return !G.continued && Ads.available; }
+  function showContinue() {
+    G.mode = 'continue'; G.contT = 10; contBusy = false;
+    G.speed = 0;
+    $('contWatch').disabled = false;
+    $('contWatch').textContent = '広告を見て続行';
+    $('contNote').textContent = '';
+    $('contCount').textContent = '10';
+    $('continue').hidden = false;
+    $('touch').hidden = true; $('btnPause').hidden = true;
+    Object.keys(input).forEach(k => input[k] = false);
+  }
+  function updateContinue(dt) {
+    if (contBusy) return;
+    G.contT -= dt;
+    $('contCount').textContent = Math.max(0, Math.ceil(G.contT));
+    if (G.contT <= 0) giveUp();
+  }
+  function giveUp() {
+    if (G.mode !== 'continue') return;
+    $('continue').hidden = true;
+    G.continued = true;
+    G.mode = 'play';
+    finish(false);
+  }
+  async function watchForContinue() {
+    if (G.mode !== 'continue' || contBusy) return;
+    contBusy = true;
+    $('contWatch').disabled = true;
+    $('contWatch').textContent = '広告を読み込み中…';
+    const result = await Ads.showRewarded();
+    if (G.mode !== 'continue') return;
+    if (result === 'unavailable') {
+      $('contNote').textContent = '広告を読み込めませんでした';
+      setTimeout(() => { contBusy = false; giveUp(); }, 2000);
+      return;
+    }
+    contBusy = false;
+    if (result !== 'rewarded') { giveUp(); return; }
+    $('continue').hidden = true;
+    G.continued = true;
+    G.time = CONTINUE_SEC;
+    G.invul = 2;
+    G.mode = 'play';
+    $('touch').hidden = !(isTouch() || NATIVE); $('btnPause').hidden = false;
+    showMsg(`CONTINUE!<small>+${CONTINUE_SEC}秒</small>`, 'cp', 1500);
+  }
+
   function makeResult(goal) {
     const pz = G.position + PLAYER_Z;
     const seg = findSeg(pz);
@@ -1011,6 +1068,11 @@
   }
   async function nativeShare() {
     const text = shareText(), url = shareUrl();
+    const capShare = plugin('Share');
+    if (capShare) {
+      try { await capShare.share({ title: '酷道168号の星', text: text + '\n#酷道168号の星', url, dialogTitle: '結果をシェア' }); } catch (e) { /* キャンセル */ }
+      return;
+    }
     const data = { title: '酷道168号の星', text: url ? text : text + '\n#酷道168号の星', url: url || undefined };
     try {
       const blob = await new Promise(res => $('resCard').toBlob(res, 'image/png'));
@@ -1098,7 +1160,23 @@
   });
   window.addEventListener('keyup', (e) => { const k = KEYMAP[e.code]; if (k) { input[k] = false; e.preventDefault(); } });
   window.addEventListener('blur', () => { Object.keys(input).forEach(k => input[k] = false); if (G.mode === 'play') togglePause(true); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden && G.mode === 'play') togglePause(true); });
+  // アプリが裏に回ったら一時停止して音を止める
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      Object.keys(input).forEach(k => input[k] = false);
+      if (G.mode === 'play' || G.mode === 'countdown') togglePause(true);
+      Sound.suspend();
+    } else if (!Ads.showing) Sound.resume();
+  });
+  // Android の戻るボタン：プレイ中はポーズ切替、タイトル・結果画面ではアプリを閉じる
+  if (plugin('App')) {
+    plugin('App').addListener('backButton', () => {
+      if (!$('howto').hidden) { $('howto').hidden = true; return; }
+      if (G.mode === 'title' || G.mode === 'result') plugin('App').exitApp();
+      else if (G.mode === 'continue') { if (!contBusy) giveUp(); }
+      else if (G.mode === 'play' || G.mode === 'countdown' || G.mode === 'paused') togglePause();
+    });
+  }
 
   function bindTouch() {
     document.querySelectorAll('#touch [data-key]').forEach(btn => {
@@ -1122,7 +1200,7 @@
       G.mode = pausedFrom || 'play'; $('pause').hidden = true;
     }
   }
-  function hideAll() { ['title', 'howto', 'pause', 'result'].forEach(id => { $(id).hidden = true; }); }
+  function hideAll() { ['title', 'howto', 'pause', 'result', 'continue'].forEach(id => { $(id).hidden = true; }); }
   function toTitle() {
     hideAll();
     $('hud').hidden = true; $('touch').hidden = true; $('btnPause').hidden = true;
@@ -1142,7 +1220,21 @@
     $('btnResume').addEventListener('click', () => togglePause());
     $('btnPause').addEventListener('click', () => togglePause());
     $('btnQuit').addEventListener('click', toTitle);
-    $('btnRetry').addEventListener('click', startGame);
+    // 2 回に 1 回、「もう一度走る」の前に全画面広告を出す（Android アプリのみ）
+    let retryBusy = false;
+    $('btnRetry').addEventListener('click', async () => {
+      if (retryBusy) return;
+      Sound.init();
+      G.retries = (G.retries || 0) + 1;
+      if (Ads.available && G.retries % 2 === 0) {
+        retryBusy = true;
+        await Ads.showInterstitial();
+        retryBusy = false;
+      }
+      startGame();
+    });
+    $('contWatch').addEventListener('click', watchForContinue);
+    $('contGiveUp').addEventListener('click', () => { if (!contBusy) giveUp(); });
     $('btnTitle').addEventListener('click', toTitle);
     $('shareX').addEventListener('click', () => openShare('x'));
     $('shareLine').addEventListener('click', () => openShare('line'));
@@ -1150,7 +1242,18 @@
     $('shareCopy').addEventListener('click', copyResult);
     $('shareImg').addEventListener('click', saveImage);
     const ns = $('shareNative');
-    if (navigator.share) ns.addEventListener('click', nativeShare); else ns.hidden = true;
+    if (NATIVE) {
+      // アプリでは Android の共有メニューにまとめる（X・LINE などもここから選べる）
+      ['shareX', 'shareLine', 'shareFb', 'shareImg'].forEach(id => { $(id).hidden = true; });
+      ns.textContent = 'シェアする';
+      ns.addEventListener('click', nativeShare);
+    } else if (navigator.share) ns.addEventListener('click', nativeShare); else ns.hidden = true;
+    // どのビルドが入っているか分かるよう、アプリ版はタイトル画面にバージョンを出す
+    if (window.APP_VERSION && window.APP_VERSION !== 'dev') $('buildInfo').textContent = window.APP_VERSION;
+    // EU など同意が必要な地域では、タイトル画面から広告の同意内容を変更できるようにする
+    Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').hidden = false; });
+    $('adPrivacyLink').addEventListener('click', e => { e.preventDefault(); Ads.showPrivacyOptions(); });
+    if (NATIVE) document.body.classList.add('native');
     const mute = $('btnMute');
     const upd = () => { mute.textContent = Sound.muted ? '🔇' : '🔊'; };
     upd();

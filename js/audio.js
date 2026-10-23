@@ -94,6 +94,9 @@ const Sound = (() => {
     fanfare() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, 0.3, 'triangle', 0.3, i * 0.14)); },
     bonus() { tone(1320, 0.12, 'square', 0.12); tone(1760, 0.15, 'square', 0.12, 0.06); },
     setMuted,
+    // アプリが裏に回ったときや広告の表示中は音を止める
+    suspend() { if (ac && ac.state === 'running') ac.suspend(); },
+    resume() { if (ac && ac.state === 'suspended') ac.resume(); },
     get muted() { return muted; },
   };
 })();

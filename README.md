@@ -43,6 +43,44 @@ npx http-server -p 8080 .
 標高表示（HUD）は実際の168号のおおよその標高プロファイル（天辻峠付近で約800m）に基づいています。
 空の色は朝の枚方から夕暮れの新宮へと移り変わります。
 
+## Android アプリ
+
+[Capacitor](https://capacitorjs.com/) で Android アプリにしています（パッケージ名 `jp.techgym.kokudo168`）。
+ゲームのファイルはアプリに同梱しているので、通信なしでも遊べます（文字は端末のフォントになります）。
+
+- 戻るボタン：プレイ中は一時停止、タイトル・結果画面ではアプリを終了
+- 別のアプリに切り替えると自動で一時停止し、音も止まる
+- シェアは Android の共有メニュー（X・LINE なども選べる）
+- 広告（Google AdMob）：時間切れのとき 1 ゲーム 1 回だけ「広告を見て +20 秒で続行」、「もう一度走る」の 2 回に 1 回は全画面広告
+- タイトル画面にバージョンとプライバシーポリシー、EU などでは「広告の設定」
+
+ビルドは GitHub Actions（`.github/workflows/android.yml`）で行います。
+既定ブランチへの push で、動作確認用の APK（テスト広告）が Release `android-latest` に載ります。
+
+```
+https://github.com/techgymjp/kokudo168/releases/latest/download/kokudo168.apk
+```
+
+リポジトリの Secrets に署名鍵（`ANDROID_KEYSTORE_BASE64` など 4 つ）を登録すると、Google Play 用の署名付き AAB（本番広告）も Artifact に出力されます。
+
+手元でビルドする場合：
+
+```sh
+npm ci
+npm run android:sync   # www/ を作って android/ にコピー
+npm run android:open   # Android Studio で開く
+```
+
+### 本番公開の前に必要なこと
+
+- AdMob でアプリと広告ユニット（インタースティシャル・リワード）を作成し、
+  `android/app/src/main/res/values/strings.xml` の `admob_app_id` と `js/ads.js` の `production` を書き換える
+  （いまは Google 公式のテスト用 ID。本番の広告ユニット ID が空のあいだは本番ビルドで広告を出さない）
+
+## ライセンス
+
+All rights reserved. 著作権はテックジム株式会社に帰属します。無断での複製・改変・再配布、Web サイトやアプリとしての公開を禁止します。ただし、テックジムの受講生が学習目的で複製・改変することは許可します（商用利用は不可。詳しくは `LICENSE`）。
+
 ## ファイル構成
 
 - `index.html` / `css/style.css` — 画面・HUD・タイトル・結果画面
@@ -50,5 +88,10 @@ npx http-server -p 8080 .
 - `js/route.js` — 国道168号のコース定義（道幅・カーブ・勾配・名所の配置）
 - `js/sprites.js` — 車・樹木・神社・大鳥居・吊り橋・標識・背景の山並みをキャンバスで手続き生成
 - `js/audio.js` — WebAudio によるエンジン音・効果音
+- `js/ads.js` / `js/ads-config.js` — Google AdMob 広告（Android アプリのみ）と広告のモード（test / production）
+- `js/build-info.js` — タイトル画面に出すバージョン（ビルド時に生成）
+- `android/` — Android アプリのプロジェクト（Capacitor）
+- `assets/` — アプリアイコンと起動画面の元画像
+- `scripts/build-web.js` — Android に同梱する Web ファイルを `www/` にまとめるスクリプト
 
 デバッグ用に `?stage=0`〜`?stage=7` を付けると指定区間から開始できます。
