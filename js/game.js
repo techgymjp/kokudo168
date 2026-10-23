@@ -5,6 +5,8 @@
   // Android アプリ（Capacitor）で動いているか
   const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
   const plugin = name => (NATIVE && window.Capacitor.Plugins ? window.Capacitor.Plugins[name] : null);
+  const t = I18N.t;
+  const stageName = (i) => t('stage.' + i);
   const canvas = $('game');
   const ctx = canvas.getContext('2d');
 
@@ -634,7 +636,7 @@
     const gap = Math.abs(c.x - G.x) - (c.w + BIKE_W) / 2;
     if (gap < -40) {
       c.ghost = true;
-      crash(c.dir > 0 ? '追突！' : '正面衝突！', c.dir > 0 ? 1.3 : 1.8);
+      crash(t(c.dir > 0 ? 'msg.rearEnd' : 'msg.headOn'), c.dir > 0 ? 1.3 : 1.8);
       if (c.dir > 0) G.speed = Math.min(G.speed, c.speed * 0.4);
       return;
     }
@@ -644,7 +646,7 @@
       G.nearMiss++;
       G.score += 300;
       G.time += 0.5;
-      showMsg(c.dir > 0 ? 'ギリギリ！ +0.5秒' : '対向車ギリギリ！ +0.5秒', 'near', 900);
+      showMsg(t(c.dir > 0 ? 'msg.near' : 'msg.nearOnc'), 'near', 900);
       Sound.whoosh(); Sound.bonus();
     } else if (gap < 600) Sound.whoosh();
   }
@@ -665,7 +667,7 @@
         const tx = rand(-w * 0.85, w * 0.85);
         G.rocks.push({ z, x0: cliffSide * (w + 500), x: cliffSide * (w + 500), tx, y: 2800, y0: 2800, vy: 0, size: rand(300, 520), sprite: Sprites.lib['rock' + Math.floor(Math.random() * 3)], prevRel: z - pz, landed: false, ghost: false });
         G.rockFalls++;
-        showMsg('⚠ 落石！', 'warn', 1000);
+        showMsg(t('msg.rock'), 'warn', 1000);
         Sound.rumble();
       }
     }
@@ -680,8 +682,8 @@
       const rel = r.z - pz;
       if (collide && !r.ghost && r.prevRel > 0 && rel <= 0) {
         const gap = Math.abs(r.x - G.x) - (r.size * 0.75 + BIKE_W) / 2;
-        if (gap < 0 && r.y < 450 && G.invul <= 0 && G.crash <= 0) { r.ghost = true; crash('落石に激突！', 1.6); }
-        else if (gap < 250 && G.speed > MAXSPEED * 0.45) { G.score += 200; showMsg('落石回避！', 'near', 800); Sound.whoosh(); }
+        if (gap < 0 && r.y < 450 && G.invul <= 0 && G.crash <= 0) { r.ghost = true; crash(t('msg.rockHit'), 1.6); }
+        else if (gap < 250 && G.speed > MAXSPEED * 0.45) { G.score += 200; showMsg(t('msg.rockDodge'), 'near', 800); Sound.whoosh(); }
       }
       r.prevRel = rel;
       if (rel < -(PLAYER_Z + 600)) G.rocks.splice(i, 1);
@@ -707,7 +709,7 @@
     G.shake = W / 60;
     G.flash = 0.5;
     G.score -= 300;
-    showMsg(msg + '<small>転倒…タイムロス</small>', 'crash', 1500);
+    showMsg(msg + `<small>${t('msg.crashSub')}</small>`, 'crash', 1500);
     Sound.crash();
     emit(40, W / 2, PLAYER_SY - H * 0.05, '#ffd27a', W / 200, 0.8);
     emit(20, W / 2, PLAYER_SY - H * 0.05, '#999', W / 300, 1.2);
@@ -788,7 +790,7 @@
           if (G.scrapeT <= 0) {
             G.scrapeT = 0.15; Sound.scrape();
             emit(6, W / 2 + Math.sign(G.x) * W * 0.05, PLAYER_SY - H * 0.04, '#ffcc55', W / 250, 0.4);
-            if (Math.random() < 0.2) showMsg(side === 'cliff' ? 'ガリガリッ！' : 'ガードレール！', 'warn small', 500);
+            if (Math.random() < 0.2) showMsg(t(side === 'cliff' ? 'msg.cliff' : 'msg.rail'), 'warn small', 500);
           }
         }
       } else {
@@ -817,19 +819,19 @@
         G.stage = seg.stage;
         const st = track.stages[G.stage];
         G.time += st.bonus;
-        showMsg(`CHECK POINT<small>${st.name}　+${st.bonus}秒</small>`, 'cp', 2200);
+        showMsg(t('msg.cp', { name: stageName(G.stage), sec: st.bonus }), 'cp', 2200);
         Sound.chime();
       }
       // 名所トースト
       for (let i = G.lastSeg + 1; i <= seg.index; i++) {
         const inf = segments[i].info;
-        if (inf && inf.title !== 'GOAL') toast(inf.title, inf.desc);
+        if (inf && inf.title !== 'GOAL') toast(...I18N.landmark(inf.title, inf.desc));
       }
       G.lastSeg = seg.index;
       if (seg.index >= track.goalSeg) {
         G.mode = 'goal';
         G.goalTimer = 0;
-        showMsg('GOAL!!<small>国道168号 完走！</small>', 'cp goal', 3000);
+        showMsg(t('msg.goal'), 'cp goal', 3000);
         Sound.fanfare();
         G.result = makeResult(true);
       }
@@ -888,16 +890,18 @@
     hud.timeBox.classList.toggle('danger', G.time < 10 && G.mode === 'play');
     hud.speed.textContent = Math.round(G.speed / MAXSPEED * KMH_MAX);
     hud.km.textContent = `${km.toFixed(1)} km`;
-    hud.stage.textContent = track.stages[seg.stage].name;
-    hud.alt.textContent = `標高 ${Math.round(track.altAt(km))}m`;
+    hud.stage.textContent = stageName(seg.stage);
+    hud.alt.textContent = t('hud.alt', { m: Math.round(track.altAt(km)) });
     hud.over.textContent = G.overtakes;
     hud.near.textContent = G.nearMiss;
     hud.marker.style.left = `${(km / track.TOTAL_KM) * 100}%`;
   }
   function buildProgressBar() {
     const bar = $('hudBar');
-    const towns = [['枚方', 0], ['生駒', 14], ['香芝', 30], ['五條', 58], ['十津川', 90], ['果無', 128], ['本宮', 146], ['新宮', 180]];
-    towns.forEach(([n, k]) => {
+    bar.querySelectorAll('.town').forEach(el => el.remove());
+    const names = t('towns').split(',');
+    [0, 14, 30, 58, 90, 128, 146, 180].forEach((k, i) => {
+      const n = names[i];
       const d = document.createElement('div');
       d.className = 'town';
       d.style.left = `${(k / track.TOTAL_KM) * 100}%`;
@@ -933,13 +937,13 @@
     $('btnPause').hidden = false;
     G.mode = 'countdown';
     G.countdown = 3.2;
-    toast('枚方市', '国道168号の起点。目指すは約180km先の新宮市！');
+    toast(...I18N.landmark('枚方市', '国道168号の起点。目指すは約180km先の新宮市！'));
   }
   function finish(goal) {
     if (!goal && canContinue()) { showContinue(); return; }
     G.result = makeResult(goal);
     if (!goal) {
-      showMsg('TIME UP<small>力尽きた…</small>', 'crash', 2500);
+      showMsg(t('msg.timeUp'), 'crash', 2500);
       G.mode = 'goal';
       G.goalTimer = 0.8;
     }
@@ -953,7 +957,7 @@
     G.mode = 'continue'; G.contT = 10; contBusy = false;
     G.speed = 0;
     $('contWatch').disabled = false;
-    $('contWatch').textContent = '広告を見て続行';
+    $('contWatch').textContent = t('cont.watch');
     $('contNote').textContent = '';
     $('contCount').textContent = '10';
     $('continue').hidden = false;
@@ -977,11 +981,11 @@
     if (G.mode !== 'continue' || contBusy) return;
     contBusy = true;
     $('contWatch').disabled = true;
-    $('contWatch').textContent = '広告を読み込み中…';
+    $('contWatch').textContent = t('cont.loading');
     const result = await Ads.showRewarded();
     if (G.mode !== 'continue') return;
     if (result === 'unavailable') {
-      $('contNote').textContent = '広告を読み込めませんでした';
+      $('contNote').textContent = t('cont.fail');
       setTimeout(() => { contBusy = false; giveUp(); }, 2000);
       return;
     }
@@ -993,7 +997,7 @@
     G.invul = 2;
     G.mode = 'play';
     $('touch').hidden = !(isTouch() || NATIVE); $('btnPause').hidden = false;
-    showMsg(`CONTINUE!<small>+${CONTINUE_SEC}秒</small>`, 'cp', 1500);
+    showMsg(t('msg.continue', { sec: CONTINUE_SEC }), 'cp', 1500);
   }
 
   function makeResult(goal) {
@@ -1003,18 +1007,19 @@
     let score = Math.floor(km * 100) + G.overtakes * 100 + G.nearMiss * 300 - G.crashes * 300;
     if (goal) score += 5000 + Math.floor(G.time * 100);
     score = Math.max(0, score);
-    let rank, title;
+    // 称号は言語を切り替えても表示し直せるよう、文字ではなくキーで持つ
+    let rank, titleKey;
     if (goal) {
-      if (score >= 42000 && G.crashes <= 2) { rank = 'S'; title = '酷道168号の星'; }
-      else if (score >= 34000) { rank = 'A'; title = '十津川の韋駄天'; }
-      else if (score >= 27000) { rank = 'B'; title = '果無を越えし者'; }
-      else { rank = 'C'; title = '熊野詣ライダー'; }
+      if (score >= 42000 && G.crashes <= 2) rank = 'S';
+      else if (score >= 34000) rank = 'A';
+      else if (score >= 27000) rank = 'B';
+      else rank = 'C';
+      titleKey = 'rank.' + rank;
     } else {
-      const names = ['枚方の見習いライダー', '生駒越えの挑戦者', '大和路のツーリスト', '天辻峠の挑戦者', '十津川の修行者', '果無の旅人', '本宮まであと一歩', '新宮目前の勇者'];
       rank = seg.stage >= 5 ? 'D' : 'E';
-      title = names[seg.stage];
+      titleKey = 'fail.' + seg.stage;
     }
-    return { goal, km, score, rank, title, time: G.elapsed, overtakes: G.overtakes, nearMiss: G.nearMiss, crashes: G.crashes, top: Math.round(G.topSpeed / MAXSPEED * KMH_MAX), place: track.stages[seg.stage].name };
+    return { goal, km, score, rank, titleKey, stage: seg.stage, time: G.elapsed, overtakes: G.overtakes, nearMiss: G.nearMiss, crashes: G.crashes, top: Math.round(G.topSpeed / MAXSPEED * KMH_MAX) };
   }
   function fmtTime(t) {
     const m = Math.floor(t / 60), s = Math.floor(t % 60), cs = Math.floor((t * 100) % 100);
@@ -1023,29 +1028,33 @@
   function loadBest() { try { return JSON.parse(localStorage.getItem('k168_best') || 'null'); } catch (e) { return null; } }
   function saveBest(r) {
     const b = loadBest();
-    if (!b || r.score > b.score) { try { localStorage.setItem('k168_best', JSON.stringify({ score: r.score, rank: r.rank, title: r.title, time: r.time, goal: r.goal, km: r.km })); } catch (e) { /* noop */ } return true; }
+    if (!b || r.score > b.score) { try { localStorage.setItem('k168_best', JSON.stringify({ score: r.score, rank: r.rank, titleKey: r.titleKey, time: r.time, goal: r.goal, km: r.km })); } catch (e) { /* noop */ } return true; }
     return false;
   }
   function showResult() {
     if (G.mode === 'result') return;
     G.mode = 'result';
     const r = G.result || makeResult(false);
+    G.result = r;
     const isBest = saveBest(r);
     $('hud').hidden = true; $('touch').hidden = true; $('btnPause').hidden = true;
+    fillResult(r);
+    $('resBest').hidden = !isBest;
+    $('result').hidden = false;
+  }
+  function fillResult(r) {
     $('resRank').textContent = r.rank;
     $('resRank').className = 'rank rank-' + r.rank;
-    $('resTitle').textContent = r.title;
-    $('resHead').textContent = r.goal ? '完走！ 枚方 → 新宮' : `${r.place}で力尽きた…`;
-    $('resTime').textContent = r.goal ? fmtTime(r.time) : `${r.km.toFixed(1)} km 地点`;
-    $('resTimeLbl').textContent = r.goal ? 'タイム' : '到達';
+    $('resTitle').textContent = t(r.titleKey);
+    $('resHead').textContent = r.goal ? t('res.goalHead') : t('res.failHead', { place: stageName(r.stage) });
+    $('resTime').textContent = r.goal ? fmtTime(r.time) : t('res.reachKm', { km: r.km.toFixed(1) });
+    $('resTimeLbl').textContent = t(r.goal ? 'res.time' : 'res.reach');
     $('resScore').textContent = r.score.toLocaleString();
-    $('resOver').textContent = r.overtakes + '台';
-    $('resNear').textContent = r.nearMiss + '回';
-    $('resCrash').textContent = r.crashes + '回';
+    $('resOver').textContent = t('res.cars', { n: r.overtakes });
+    $('resNear').textContent = t('res.times', { n: r.nearMiss });
+    $('resCrash').textContent = t('res.times', { n: r.crashes });
     $('resTop').textContent = r.top + 'km/h';
-    $('resBest').hidden = !isBest;
     drawResultCard(r);
-    $('result').hidden = false;
   }
 
   // ---------------------------------------------------------------- シェア
@@ -1054,14 +1063,14 @@
   function shareText() {
     const r = G.result;
     if (!r) return '';
-    const head = r.goal ? `国道168号 枚方→新宮 約180kmを ${fmtTime(r.time)} で完走！` : `国道168号を ${r.km.toFixed(1)}km 地点（${r.place}）まで激走！`;
-    return `【酷道168号の星】${head}\nランク${r.rank}「${r.title}」 SCORE ${r.score.toLocaleString()}\n追い抜き${r.overtakes}台・ギリギリ${r.nearMiss}回・転倒${r.crashes}回`;
+    const head = r.goal ? t('share.goal', { time: fmtTime(r.time) }) : t('share.fail', { km: r.km.toFixed(1), place: stageName(r.stage) });
+    return t('share.text', { head, rank: r.rank, title: t(r.titleKey), score: r.score.toLocaleString(), over: r.overtakes, near: r.nearMiss, crash: r.crashes });
   }
   function openShare(kind) {
     const text = shareText(), url = shareUrl();
     const e = encodeURIComponent;
     let href = '';
-    if (kind === 'x') href = `https://twitter.com/intent/tweet?text=${e(text)}${url ? `&url=${e(url)}` : ''}&hashtags=${e('酷道168号の星,国道168号')}`;
+    if (kind === 'x') href = `https://twitter.com/intent/tweet?text=${e(text)}${url ? `&url=${e(url)}` : ''}&hashtags=${e(t('share.tags'))}`;
     if (kind === 'line') href = `https://social-plugins.line.me/lineit/share?url=${e(url || 'https://line.me')}&text=${e(text + (url ? '\n' + url : ''))}`;
     if (kind === 'fb') href = `https://www.facebook.com/sharer/sharer.php?u=${e(url)}&quote=${e(text)}`;
     if (href) window.open(href, '_blank', 'noopener,width=620,height=560');
@@ -1070,10 +1079,10 @@
     const text = shareText(), url = shareUrl();
     const capShare = plugin('Share');
     if (capShare) {
-      try { await capShare.share({ title: '酷道168号の星', text: text + '\n#酷道168号の星', url, dialogTitle: '結果をシェア' }); } catch (e) { /* キャンセル */ }
+      try { await capShare.share({ title: t('doc.title'), text: text + '\n#酷道168号の星', url, dialogTitle: t('share.dialog') }); } catch (e) { /* キャンセル */ }
       return;
     }
-    const data = { title: '酷道168号の星', text: url ? text : text + '\n#酷道168号の星', url: url || undefined };
+    const data = { title: t('doc.title'), text: url ? text : text + '\n#酷道168号の星', url: url || undefined };
     try {
       const blob = await new Promise(res => $('resCard').toBlob(res, 'image/png'));
       if (blob) {
@@ -1084,11 +1093,11 @@
     try { await navigator.share(data); } catch (e) { /* キャンセル */ }
   }
   async function copyResult() {
-    const t = shareText() + (shareUrl() ? '\n' + shareUrl() : '') + '\n#酷道168号の星';
-    try { await navigator.clipboard.writeText(t); showCopied('コピーしました！'); }
+    const txt = shareText() + (shareUrl() ? '\n' + shareUrl() : '') + '\n#酷道168号の星';
+    try { await navigator.clipboard.writeText(txt); showCopied(t('share.copied')); }
     catch (e) {
-      const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); showCopied('コピーしました！'); } catch (e2) { showCopied('コピーできませんでした'); }
+      const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showCopied(t('share.copied')); } catch (e2) { showCopied(t('share.copyFail')); }
       ta.remove();
     }
   }
@@ -1119,15 +1128,15 @@
     g.font = `400 72px ${Sprites.TITLE_FONT}`;
     g.fillStyle = '#ffd400'; g.fillText('酷道168号の星', 60, 110);
     g.font = `900 34px ${Sprites.FONT}`; g.fillStyle = '#fff';
-    g.fillText(r.goal ? '完走！ 枚方市 → 新宮市 約180km' : `${r.place}（${r.km.toFixed(1)}km地点）で力尽きた…`, 60, 170);
+    g.fillText(r.goal ? t('card.goal') : t('card.fail', { place: stageName(r.stage), km: r.km.toFixed(1) }), 60, 170);
     // ランク
     g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(60, 210, 300, 300);
     g.font = `400 220px ${Sprites.TITLE_FONT}`; g.textAlign = 'center';
     g.fillStyle = { S: '#ffd400', A: '#ff7a59', B: '#7fd1ff', C: '#a5e887', D: '#ddd', E: '#bbb' }[r.rank];
     g.fillText(r.rank, 210, 450);
-    g.font = `900 30px ${Sprites.FONT}`; g.fillStyle = '#fff'; g.fillText(`「${r.title}」`, 210, 500);
+    g.font = `900 30px ${Sprites.FONT}`; g.fillStyle = '#fff'; g.fillText(I18N.lang === 'en' ? `“${t(r.titleKey)}”` : `「${t(r.titleKey)}」`, 210, 500, 290);
     g.textAlign = 'left';
-    const rows = [[r.goal ? 'TIME' : '到達', r.goal ? fmtTime(r.time) : `${r.km.toFixed(1)} km`], ['SCORE', r.score.toLocaleString()], ['追い抜き', `${r.overtakes} 台`], ['ギリギリ', `${r.nearMiss} 回`], ['転倒', `${r.crashes} 回`], ['最高速', `${r.top} km/h`]];
+    const rows = [[r.goal ? 'TIME' : t('card.reach'), r.goal ? fmtTime(r.time) : `${r.km.toFixed(1)} km`], ['SCORE', r.score.toLocaleString()], [t('res.over'), t('card.cars', { n: r.overtakes })], [t('res.near'), t('card.times', { n: r.nearMiss })], [t('res.crash'), t('card.times', { n: r.crashes })], [t('res.top'), `${r.top} km/h`]];
     rows.forEach(([k, v], i) => {
       const y = 250 + i * 50;
       g.font = `700 30px ${Sprites.FONT}`; g.fillStyle = '#ffd9a0'; g.fillText(k, 420, y);
@@ -1140,7 +1149,7 @@
     const px = 420 + 720 * (r.km / track.TOTAL_KM);
     g.beginPath(); g.arc(px, 580, 12, 0, Math.PI * 2); g.fill();
     g.font = `700 20px ${Sprites.FONT}`; g.fillStyle = '#fff';
-    g.fillText('枚方', 410, 560); g.textAlign = 'right'; g.fillText('新宮', 1150, 560);
+    g.fillText(t('card.from'), 410, 560); g.textAlign = 'right'; g.fillText(t('card.to'), 1150, 560);
     g.textAlign = 'right'; g.font = `700 22px ${Sprites.FONT}`; g.fillStyle = 'rgba(255,255,255,0.8)';
     g.fillText('#酷道168号の星', 1140, 70);
     const sign = Sprites.lib.sign168;
@@ -1211,7 +1220,9 @@
   }
   function showBest() {
     const b = loadBest();
-    $('best').textContent = b ? `自己ベスト：ランク${b.rank}「${b.title}」 SCORE ${b.score.toLocaleString()}${b.goal ? ' / ' + fmtTime(b.time) : ''}` : '';
+    // 以前の記録（称号を文字で保存していたもの）もそのまま表示する
+    const title = b && (b.titleKey ? t(b.titleKey) : b.title);
+    $('best').textContent = b ? t('title.best', { rank: b.rank, title, score: b.score.toLocaleString(), time: b.goal ? ' / ' + fmtTime(b.time) : '' }) : '';
   }
   function bindUi() {
     $('btnStart').addEventListener('click', startGame);
@@ -1245,15 +1256,26 @@
     if (NATIVE) {
       // アプリでは Android の共有メニューにまとめる（X・LINE などもここから選べる）
       ['shareX', 'shareLine', 'shareFb', 'shareImg'].forEach(id => { $(id).hidden = true; });
-      ns.textContent = 'シェアする';
+      ns.dataset.i18n = 'share.app';
       ns.addEventListener('click', nativeShare);
-    } else if (navigator.share) ns.addEventListener('click', nativeShare); else ns.hidden = true;
+    } else {
+      ns.dataset.i18n = 'share.native';
+      if (navigator.share) ns.addEventListener('click', nativeShare); else ns.hidden = true;
+    }
     // どのビルドが入っているか分かるよう、アプリ版はタイトル画面にバージョンを出す
     if (window.APP_VERSION && window.APP_VERSION !== 'dev') $('buildInfo').textContent = window.APP_VERSION;
     // EU など同意が必要な地域では、タイトル画面から広告の同意内容を変更できるようにする
     Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').hidden = false; });
     $('adPrivacyLink').addEventListener('click', e => { e.preventDefault(); Ads.showPrivacyOptions(); });
     if (NATIVE) document.body.classList.add('native');
+    // 言語の切り替え（タイトル画面）
+    document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => I18N.setLang(b.dataset.lang)));
+    I18N.onChange(() => {
+      buildProgressBar();
+      showBest();
+      if (G.result && !$('result').hidden) fillResult(G.result);
+    });
+    I18N.apply();
     const mute = $('btnMute');
     const upd = () => { mute.textContent = Sound.muted ? '🔇' : '🔊'; };
     upd();

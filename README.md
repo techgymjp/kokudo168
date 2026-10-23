@@ -27,6 +27,11 @@ npx http-server -p 8080 .
 - 結果画面から X / LINE / Facebook / 端末の共有機能でシェア、結果画像の保存も可能
   （シェアURLは `js/game.js` の `SHARE_URL`：https://techgym.jp/column/claude-code-game-kokudo168/ ）
 
+## 表示言語
+
+日本語と英語に対応しています。端末の言語が日本語なら日本語、それ以外は英語で表示し、タイトル画面のボタンで切り替えられます（`js/i18n.js`）。
+道路標識や看板など、風景に描かれた文字は日本の景色としてそのまま日本語です。
+
 ## コース（8区間）
 
 | 区間 | 主な景観 |
@@ -90,6 +95,7 @@ All rights reserved. 著作権はテックジム株式会社に帰属します�
 - `js/route.js` — 国道168号のコース定義（道幅・カーブ・勾配・名所の配置）
 - `js/sprites.js` — 車・樹木・神社・大鳥居・吊り橋・標識・背景の山並みをキャンバスで手続き生成
 - `js/audio.js` — WebAudio によるエンジン音・効果音
+- `js/i18n.js` — 表示言語（日本語 / 英語）の翻訳表
 - `js/ads.js` / `js/ads-config.js` — Google AdMob 広告（Android アプリのみ）と広告のモード（test / production）
 - `js/build-info.js` — タイトル画面に出すバージョン（ビルド時に生成）
 - `android/` — Android アプリのプロジェクト（Capacitor）

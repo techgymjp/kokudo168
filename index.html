@@ -27,11 +27,11 @@
     <div id="hudTimeBox" class="hud-box hud-time"><span class="lbl">TIME</span><span id="hudTime">0</span></div>
     <div class="hud-box hud-center">
       <div id="hudStage">枚方市・交野市</div>
-      <div class="hud-sub"><span id="hudKm">0.0 km</span> / 180 km　<span id="hudAlt">標高 15m</span></div>
+      <div class="hud-sub"><span id="hudKm">0.0 km</span> / 180 km　<span id="hudAlt"></span></div>
     </div>
     <div class="hud-box hud-speed"><span id="hudSpeed">0</span><small>km/h</small></div>
   </div>
-  <div class="hud-stats">追い抜き <b id="hudOver">0</b>　ギリギリ <b id="hudNear">0</b></div>
+  <div class="hud-stats"><span data-i18n="hud.over">追い抜き</span> <b id="hudOver">0</b>　<span data-i18n="hud.near">ギリギリ</span> <b id="hudNear">0</b></div>
   <div class="hud-progress">
     <canvas id="hudProfile"></canvas>
     <div id="hudBar"><div class="line"></div><div id="hudMarker">🏍</div></div>
@@ -43,16 +43,16 @@
 <!-- タッチ操作 -->
 <div id="touch" hidden>
   <div class="tpad tleft">
-    <button data-key="left" aria-label="左">◀</button>
-    <button data-key="right" aria-label="右">▶</button>
+    <button data-key="left" aria-label="左" data-i18n-aria="aria.left">◀</button>
+    <button data-key="right" aria-label="右" data-i18n-aria="aria.right">▶</button>
   </div>
   <div class="tpad tright">
-    <button data-key="brake" class="brake">ブレーキ</button>
-    <button data-key="accel" class="accel">アクセル</button>
+    <button data-key="brake" class="brake" data-i18n="btn.brake">ブレーキ</button>
+    <button data-key="accel" class="accel" data-i18n="btn.accel">アクセル</button>
   </div>
 </div>
-<button id="btnMute" class="corner-btn" aria-label="サウンド切替">🔊</button>
-<button id="btnPause" class="corner-btn pause-btn" aria-label="一時停止" hidden>❚❚</button>
+<button id="btnMute" class="corner-btn" aria-label="サウンド切替" data-i18n-aria="aria.mute">🔊</button>
+<button id="btnPause" class="corner-btn pause-btn" aria-label="一時停止" data-i18n-aria="aria.pause" hidden>❚❚</button>
 
 <!-- タイトル -->
 <section id="title" class="overlay" hidden>
@@ -60,44 +60,45 @@
     <div class="logo">
       <span class="logo-koku">酷道</span><span class="shield">168</span><span class="logo-go">号の星</span>
     </div>
-    <p class="tagline">枚方市 → 新宮市　約180km　激走バイクツーリング</p>
-    <p class="lead">
+    <p class="tagline" data-i18n="title.tagline">枚方市 → 新宮市　約180km　激走バイクツーリング</p>
+    <p class="lead" data-i18n-html="title.lead">
       国道168号――人呼んで“酷道”。<br>
       大阪・枚方から奈良の山々を越え、熊野・新宮まで一気に駆け抜けろ！<br>
       とろとろ走る車を追い抜き、ギリギリを攻める対向車と落石をかわし、<br class="pc">
       熊野本宮大社の大鳥居を目指せ。
     </p>
     <div class="btns">
-      <button id="btnStart" class="btn primary">走り出す</button>
-      <button id="btnHowto" class="btn">遊び方</button>
+      <button id="btnStart" class="btn primary" data-i18n="title.start">走り出す</button>
+      <button id="btnHowto" class="btn" data-i18n="title.howto">遊び方</button>
     </div>
+    <p class="lang-sel"><button class="lang-btn" data-lang="ja">日本語</button><button class="lang-btn" data-lang="en">English</button></p>
     <p id="best" class="best"></p>
     <p class="legal">
       <span id="buildInfo"></span>
-      <a href="https://techgym.jp/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>
-      <span id="adPrivacy" hidden>｜<a href="#" id="adPrivacyLink">広告の設定</a></span>
+      <a href="https://techgym.jp/privacy-policy/" data-i18n-href="url.privacy" target="_blank" rel="noopener" data-i18n="legal.privacy">プライバシーポリシー</a>
+      <span id="adPrivacy" hidden>｜<a href="#" id="adPrivacyLink" data-i18n="legal.adSettings">広告の設定</a></span>
     </p>
-    <p class="rotate-hint">📱 横画面にするともっと走りやすい！</p>
+    <p class="rotate-hint" data-i18n="title.rotate">📱 横画面にするともっと走りやすい！</p>
   </div>
 </section>
 
 <section id="howto" class="overlay" hidden>
   <div class="panel">
-    <h2>遊び方</h2>
+    <h2 data-i18n="howto.title">遊び方</h2>
     <table class="keys keys-pc">
-      <tr><th>← →</th><td>ハンドル（A / D でもOK）</td></tr>
-      <tr><th>↑ / Space</th><td>アクセル（W / Z でもOK）</td></tr>
-      <tr><th>↓</th><td>ブレーキ（S / X でもOK）</td></tr>
-      <tr><th>Esc / P</th><td>一時停止</td></tr>
+      <tr><th>← →</th><td data-i18n="howto.steer">ハンドル（A / D でもOK）</td></tr>
+      <tr><th>↑ / Space</th><td data-i18n="howto.accel">アクセル（W / Z でもOK）</td></tr>
+      <tr><th>↓</th><td data-i18n="howto.brake">ブレーキ（S / X でもOK）</td></tr>
+      <tr><th>Esc / P</th><td data-i18n="howto.pause">一時停止</td></tr>
     </table>
-    <p class="note keys-pc">スマホは画面下のボタンで操作できます。</p>
+    <p class="note keys-pc" data-i18n="howto.touchNote">スマホは画面下のボタンで操作できます。</p>
     <table class="keys keys-app">
-      <tr><th>◀ ▶</th><td>ハンドル</td></tr>
-      <tr><th>アクセル</th><td>加速（押しっぱなし）</td></tr>
-      <tr><th>ブレーキ</th><td>減速</td></tr>
-      <tr><th>❚❚ / 戻る</th><td>一時停止</td></tr>
+      <tr><th>◀ ▶</th><td data-i18n="howto.appSteer">ハンドル</td></tr>
+      <tr><th data-i18n="btn.accel">アクセル</th><td data-i18n="howto.appAccel">加速（押しっぱなし）</td></tr>
+      <tr><th data-i18n="btn.brake">ブレーキ</th><td data-i18n="howto.appBrake">減速</td></tr>
+      <tr><th data-i18n="howto.appPauseKey">❚❚ / 戻る</th><td data-i18n="howto.pause">一時停止</td></tr>
     </table>
-    <ul>
+    <ul data-i18n-html="howto.rules">
       <li>持ち時間がなくなる前に<b>チェックポイント</b>を通過すると時間が延長されます。</li>
       <li>日本は左側通行。<b>とろとろ走る車</b>は対向車線にはみ出して追い抜こう。</li>
       <li>対向車や車スレスレをすり抜けると<b>「ギリギリ！」</b>ボーナス（+0.5秒）。</li>
@@ -106,16 +107,16 @@
       <li>崖やガードレールにこするとガリガリ減速。衝突すると転倒してタイムロス。</li>
       <li>急カーブはスピードを出しすぎると外へ膨らみます。</li>
     </ul>
-    <button id="btnHowtoClose" class="btn primary">OK</button>
+    <button id="btnHowtoClose" class="btn primary" data-i18n="btn.ok">OK</button>
   </div>
 </section>
 
 <section id="pause" class="overlay" hidden>
   <div class="panel small">
-    <h2>一時停止</h2>
+    <h2 data-i18n="pause.title">一時停止</h2>
     <div class="btns col">
-      <button id="btnResume" class="btn primary">再開する</button>
-      <button id="btnQuit" class="btn">タイトルへ</button>
+      <button id="btnResume" class="btn primary" data-i18n="pause.resume">再開する</button>
+      <button id="btnQuit" class="btn" data-i18n="pause.quit">タイトルへ</button>
     </div>
   </div>
 </section>
@@ -124,11 +125,11 @@
 <section id="continue" class="overlay" hidden>
   <div class="panel small">
     <h2>TIME UP</h2>
-    <p class="cont-lead">広告を見て <b>+20秒</b> で続行しますか？</p>
+    <p class="cont-lead" data-i18n-html="cont.lead">広告を見て <b>+20秒</b> で続行しますか？</p>
     <div id="contCount" class="cont-count">10</div>
     <div class="btns col">
-      <button id="contWatch" class="btn primary">広告を見て続行</button>
-      <button id="contGiveUp" class="btn">あきらめる</button>
+      <button id="contWatch" class="btn primary" data-i18n="cont.watch">広告を見て続行</button>
+      <button id="contGiveUp" class="btn" data-i18n="cont.giveUp">あきらめる</button>
     </div>
     <p id="contNote" class="note"></p>
   </div>
@@ -144,39 +145,40 @@
         <div id="resTitle" class="res-title"></div>
         <div class="res-big"><span id="resTimeLbl">タイム</span><b id="resTime"></b></div>
         <div class="res-big"><span>SCORE</span><b id="resScore"></b></div>
-        <p id="resBest" class="res-best" hidden>★ 自己ベスト更新！</p>
+        <p id="resBest" class="res-best" data-i18n="res.best" hidden>★ 自己ベスト更新！</p>
       </div>
     </div>
     <dl class="res-stats">
-      <div><dt>追い抜き</dt><dd id="resOver"></dd></div>
-      <div><dt>ギリギリ</dt><dd id="resNear"></dd></div>
-      <div><dt>転倒</dt><dd id="resCrash"></dd></div>
-      <div><dt>最高速</dt><dd id="resTop"></dd></div>
+      <div><dt data-i18n="res.over">追い抜き</dt><dd id="resOver"></dd></div>
+      <div><dt data-i18n="res.near">ギリギリ</dt><dd id="resNear"></dd></div>
+      <div><dt data-i18n="res.crash">転倒</dt><dd id="resCrash"></dd></div>
+      <div><dt data-i18n="res.top">最高速</dt><dd id="resTop"></dd></div>
     </dl>
     <canvas id="resCard" class="res-card" aria-label="結果画像"></canvas>
     <div class="share">
-      <p>結果をシェア</p>
+      <p data-i18n="res.share">結果をシェア</p>
       <div class="share-btns">
-        <button id="shareX" class="sbtn x">𝕏 ポスト</button>
+        <button id="shareX" class="sbtn x" data-i18n="share.x">𝕏 ポスト</button>
         <button id="shareLine" class="sbtn line">LINE</button>
         <button id="shareFb" class="sbtn fb">Facebook</button>
         <button id="shareNative" class="sbtn native">共有…</button>
-        <button id="shareCopy" class="sbtn copy">テキストをコピー</button>
-        <button id="shareImg" class="sbtn img">画像を保存</button>
+        <button id="shareCopy" class="sbtn copy" data-i18n="share.copy">テキストをコピー</button>
+        <button id="shareImg" class="sbtn img" data-i18n="share.img">画像を保存</button>
       </div>
       <span id="copied" class="copied"></span>
     </div>
     <div class="btns">
-      <button id="btnRetry" class="btn primary">もう一度走る</button>
-      <button id="btnTitle" class="btn">タイトルへ</button>
+      <button id="btnRetry" class="btn primary" data-i18n="res.retry">もう一度走る</button>
+      <button id="btnTitle" class="btn" data-i18n="res.title">タイトルへ</button>
     </div>
   </div>
 </section>
 
-<div id="loading">読み込み中…</div>
+<div id="loading" data-i18n="loading">読み込み中…</div>
 
 <script src="js/build-info.js"></script>
 <script src="js/ads-config.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/ads.js"></script>
 <script src="js/sprites.js"></script>
