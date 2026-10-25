@@ -1161,7 +1161,7 @@
   window.addEventListener('keydown', (e) => {
     const k = KEYMAP[e.code];
     if (k) { input[k] = true; e.preventDefault(); }
-    if (e.code === 'Escape' || e.code === 'KeyP') togglePause();
+    if (e.code === 'Escape' || e.code === 'KeyP') pauseOrResume();
     if (e.code === 'Enter') {
       if (G.mode === 'title' && $('howto').hidden) startGame();
       else if (G.mode === 'result') startGame();
@@ -1183,7 +1183,7 @@
       if (!$('howto').hidden) { $('howto').hidden = true; return; }
       if (G.mode === 'title' || G.mode === 'result') plugin('App').exitApp();
       else if (G.mode === 'continue') { if (!contBusy) giveUp(); }
-      else if (G.mode === 'play' || G.mode === 'countdown' || G.mode === 'paused') togglePause();
+      else if (G.mode === 'play' || G.mode === 'countdown' || G.mode === 'paused') pauseOrResume();
     });
   }
 
@@ -1209,6 +1209,19 @@
       G.mode = pausedFrom || 'play'; $('pause').hidden = true;
     }
   }
+  // ポーズからの再開は、毎回その前に全画面広告を出す（Android アプリのみ）。広告が読み込めていなければそのまま再開
+  let resumeBusy = false;
+  async function pauseOrResume() {
+    if (G.mode !== 'paused') { togglePause(); return; }
+    if (resumeBusy) return;
+    if (Ads.canInterstitial) {
+      resumeBusy = true;
+      await Ads.showInterstitial();
+      resumeBusy = false;
+    }
+    Object.keys(input).forEach(k => input[k] = false);
+    if (G.mode === 'paused') togglePause();
+  }
   function hideAll() { ['title', 'howto', 'pause', 'result', 'continue'].forEach(id => { $(id).hidden = true; }); }
   function toTitle() {
     hideAll();
@@ -1228,8 +1241,8 @@
     $('btnStart').addEventListener('click', startGame);
     $('btnHowto').addEventListener('click', () => { $('howto').hidden = false; });
     $('btnHowtoClose').addEventListener('click', () => { $('howto').hidden = true; });
-    $('btnResume').addEventListener('click', () => togglePause());
-    $('btnPause').addEventListener('click', () => togglePause());
+    $('btnResume').addEventListener('click', pauseOrResume);
+    $('btnPause').addEventListener('click', pauseOrResume);
     // 「もう一度走る」「タイトルへ」を押したら、毎回その前に全画面広告を出す（Android アプリのみ）
     let adBusy = false;
     const withInterstitial = (next) => async () => {
