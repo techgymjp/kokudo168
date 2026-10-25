@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <!-- 英語の端末で表示するアプリ名（それ以外の項目は values/strings.xml を使う） -->
+    <string name="app_name">Kokudo 168 Star</string>
+    <string name="title_activity_main">Kokudo 168 Star</string>
+</resources>
