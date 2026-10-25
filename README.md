@@ -81,6 +81,10 @@ npm run android:sync   # www/ を作って android/ にコピー
 npm run android:open   # Android Studio で開く
 ```
 
+### Google Play の掲載情報
+
+ストア用の画像（アイコン・フィーチャーグラフィック・日英のスクリーンショット）と紹介文の下書きは `docs/store/` にあります（`listing.md`）。
+
 ### 広告の設定
 
 - AdMob のアプリ ID：`android/app/src/main/res/values/strings.xml` の `admob_app_id`
