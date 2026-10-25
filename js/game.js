@@ -952,7 +952,7 @@
   // 時間切れのとき、1 ゲーム 1 回だけ「広告を見て +20 秒」を提案する。10 秒で自動的にあきらめる
   const CONTINUE_SEC = 20;
   let contBusy = false;
-  function canContinue() { return !G.continued && Ads.available; }
+  function canContinue() { return !G.continued && Ads.canReward; }
   function showContinue() {
     G.mode = 'continue'; G.contT = 10; contBusy = false;
     G.speed = 0;
@@ -1230,23 +1230,23 @@
     $('btnHowtoClose').addEventListener('click', () => { $('howto').hidden = true; });
     $('btnResume').addEventListener('click', () => togglePause());
     $('btnPause').addEventListener('click', () => togglePause());
-    $('btnQuit').addEventListener('click', toTitle);
-    // 2 回に 1 回、「もう一度走る」の前に全画面広告を出す（Android アプリのみ）
-    let retryBusy = false;
-    $('btnRetry').addEventListener('click', async () => {
-      if (retryBusy) return;
+    // 「もう一度走る」「タイトルへ」を押したら、毎回その前に全画面広告を出す（Android アプリのみ）
+    let adBusy = false;
+    const withInterstitial = (next) => async () => {
+      if (adBusy) return;
       Sound.init();
-      G.retries = (G.retries || 0) + 1;
-      if (Ads.available && G.retries % 2 === 0) {
-        retryBusy = true;
+      if (Ads.canInterstitial) {
+        adBusy = true;
         await Ads.showInterstitial();
-        retryBusy = false;
+        adBusy = false;
       }
-      startGame();
-    });
+      next();
+    };
+    $('btnRetry').addEventListener('click', withInterstitial(startGame));
+    $('btnTitle').addEventListener('click', withInterstitial(toTitle));
+    $('btnQuit').addEventListener('click', withInterstitial(toTitle));
     $('contWatch').addEventListener('click', watchForContinue);
     $('contGiveUp').addEventListener('click', () => { if (!contBusy) giveUp(); });
-    $('btnTitle').addEventListener('click', toTitle);
     $('shareX').addEventListener('click', () => openShare('x'));
     $('shareLine').addEventListener('click', () => openShare('line'));
     $('shareFb').addEventListener('click', () => openShare('fb'));
@@ -1291,6 +1291,8 @@
     update(dt);
     render();
     updateHud();
+    // バナー広告はタイトル・ポーズ・結果画面だけ（Android アプリのみ）
+    Ads.setBanner(G.mode === 'title' || G.mode === 'paused' || G.mode === 'result');
     requestAnimationFrame(frame);
   }
 

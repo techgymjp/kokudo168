@@ -215,3 +215,17 @@ body.native .rotate-hint { display: none; }
 @media (max-height: 500px) { .lang-sel { margin-top: 6px; } .lang-btn { font-size: 12px; padding: 4px 12px; } }
 html[lang="en"] .tpad button.brake, html[lang="en"] .tpad button.accel { font-size: 15px; }
 html[lang="en"] #hudBar .town span { font-size: 9px; }
+
+/* ---------- バナー広告（Android アプリ） ---------- */
+/* バナーは画面下に重なって出るので、その高さ（--ad-h）だけ下を空ける */
+:root { --ad-h: 0px; }
+.overlay { padding-bottom: calc(16px + var(--ad-h)); transition: padding-bottom .2s; }
+.corner-btn { margin-bottom: var(--ad-h); }
+body:has(#touch:not([hidden])) .corner-btn { margin-bottom: 0; }
+/* 横画面のスマホ（高さが小さい）でバナーと重ならないようタイトルを詰める */
+@media (max-height: 500px) {
+  .logo { font-size: min(11vw, 16vh); }
+  .lead { font-size: 12px; line-height: 1.45; margin-bottom: 8px; }
+  .tagline { font-size: 14px; }
+  .best, .legal { margin-top: 4px; }
+}

@@ -56,7 +56,10 @@ npx http-server -p 8080 .
 - 戻るボタン：プレイ中は一時停止、タイトル・結果画面ではアプリを終了
 - 別のアプリに切り替えると自動で一時停止し、音も止まる
 - シェアは Android の共有メニュー（X・LINE なども選べる）
-- 広告（Google AdMob）：時間切れのとき 1 ゲーム 1 回だけ「広告を見て +20 秒で続行」、「もう一度走る」の 2 回に 1 回は全画面広告
+- 広告（Google AdMob）
+  - バナー：タイトル・一時停止・結果画面の下に表示（プレイ中は隠す）
+  - インタースティシャル：「もう一度走る」「タイトルへ」を押したとき毎回
+  - リワード：時間切れのとき 1 ゲーム 1 回だけ「広告を見て +20 秒で続行」（本番の広告ユニットが未設定のため、いまはテスト版 APK でのみ表示）
 - タイトル画面にバージョンとプライバシーポリシー、EU などでは「広告の設定」
 
 ビルドは GitHub Actions（`.github/workflows/android.yml`）で行います。
@@ -78,11 +81,11 @@ npm run android:sync   # www/ を作って android/ にコピー
 npm run android:open   # Android Studio で開く
 ```
 
-### 本番公開の前に必要なこと
+### 広告の設定
 
-- AdMob でアプリと広告ユニット（インタースティシャル・リワード）を作成し、
-  `android/app/src/main/res/values/strings.xml` の `admob_app_id` と `js/ads.js` の `production` を書き換える
-  （いまは Google 公式のテスト用 ID。本番の広告ユニット ID が空のあいだは本番ビルドで広告を出さない）
+- AdMob のアプリ ID：`android/app/src/main/res/values/strings.xml` の `admob_app_id`
+- 広告ユニット ID：`js/ads.js` の `production`（空欄の種類は本番ビルドで出さない）
+- 動作確認用 APK はいつも Google のテスト広告。本番の広告は Google Play 用のビルド（`ADMOB_MODE=production`）だけで出る
 
 ## ライセンス
 

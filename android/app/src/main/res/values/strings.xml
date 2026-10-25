@@ -4,6 +4,5 @@
     <string name="title_activity_main">酷道168号の星</string>
     <string name="package_name">jp.techgym.kokudo168</string>
     <string name="custom_url_scheme">jp.techgym.kokudo168</string>
-    <!-- AdMob のアプリ ID。本番の ID を受け取るまでは Google 公式のテスト用アプリ ID -->
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="admob_app_id">ca-app-pub-6411535997477460~2437075500</string>
 </resources>
