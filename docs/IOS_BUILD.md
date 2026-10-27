@@ -30,7 +30,7 @@
    - アプリ ID（`ca-app-pub-…~…`）と広告ユニット ID 3 つを Claude Code に渡す（`ios/App/App/Info.plist` と `js/ads.js` に入れてもらう）
    - 「プライバシーとメッセージ」→「欧州の規制」のメッセージに iOS アプリも追加する
 
-ID を入れるまでは、Info.plist には Google のテスト用アプリ ID が入っています。本番の広告ユニット ID が空のあいだは、App Store 用のビルドでも広告は出ません。
+アプリ ID（`ca-app-pub-6411535997477460~7605993356`）は Info.plist に入れてあります。本番の広告ユニット ID が空の種類は、App Store 用のビルドでも出ません（`js/ads.js` の `UNITS.ios.production`）。
 
 ---
 

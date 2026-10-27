@@ -22,7 +22,7 @@ const Ads = (() => {
         rewarded: 'ca-app-pub-3940256099942544/1712485313',
       },
       production: {
-        banner: '',
+        banner: 'ca-app-pub-6411535997477460/2735975906',
         interstitial: '',
         rewarded: '',
       },
