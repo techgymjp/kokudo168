@@ -24,7 +24,7 @@ const Ads = (() => {
       production: {
         banner: 'ca-app-pub-6411535997477460/2735975906',
         interstitial: 'ca-app-pub-6411535997477460/4709201420',
-        rewarded: '',
+        rewarded: 'ca-app-pub-6411535997477460/7066017434',
       },
     },
   };
