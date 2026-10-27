@@ -229,3 +229,29 @@ body:has(#touch:not([hidden])) .corner-btn { margin-bottom: 0; }
   .tagline { font-size: 14px; }
   .best, .legal { margin-top: 4px; }
 }
+
+/* ---------- iPhone の切り欠き（横画面の左右）を避ける ---------- */
+.hud-top { left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); }
+.hud-stats { left: max(14px, env(safe-area-inset-left)); }
+.tleft { left: max(14px, env(safe-area-inset-left)); }
+.tright { right: max(14px, env(safe-area-inset-right)); }
+#toast { right: max(14px, env(safe-area-inset-right)); }
+.corner-btn { right: max(12px, env(safe-area-inset-right)); }
+.pause-btn { right: calc(max(12px, env(safe-area-inset-right)) + 50px); }
+body:has(#touch:not([hidden])) .corner-btn { right: max(12px, env(safe-area-inset-right)); }
+body:has(#touch:not([hidden])) .pause-btn { right: calc(max(12px, env(safe-area-inset-right)) + 50px); }
+.overlay { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+
+/* 横画面のスマホ：メッセージが上の HUD と重ならないよう下げて小さくする */
+@media (max-height: 500px) {
+  #msg { top: 54%; font-size: clamp(24px, 5vw, 48px); }
+  #msg.near, #msg.warn, #msg.warn.small { top: 54%; font-size: clamp(18px, 3.4vw, 32px); }
+  #toast { max-width: min(330px, 40vw); padding: 7px 12px; }
+  #toast b { font-size: 15px; }
+  #toast span { font-size: 11px; }
+  #msg.count { font-size: clamp(48px, 11vw, 110px); }
+}
+/* 幅が狭いと英語の地名が重なるので、近い地点（生駒）の名前を省く */
+@media (max-width: 1000px) {
+  html[lang="en"] #hudBar .town[data-i="1"] span { display: none; }
+}

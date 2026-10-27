@@ -48,6 +48,12 @@ npx http-server -p 8080 .
 標高表示（HUD）は実際の168号のおおよその標高プロファイル（天辻峠付近で約800m）に基づいています。
 空の色は朝の枚方から夕暮れの新宮へと移り変わります。
 
+## iOS アプリ
+
+Android 版と同じ Capacitor で iOS アプリにしています（`ios/`、Bundle ID `jp.techgym.kokudo168`、iPhone の横画面）。
+Mac でのビルドと App Store への提出の手順は `docs/IOS_BUILD.md` にあります。App Store 用の画像は `docs/store/ios/` です。
+push のたびに GitHub Actions（`.github/workflows/ios.yml`）が、署名なしでビルドできるかを確認します。
+
 ## Android アプリ
 
 [Capacitor](https://capacitorjs.com/) で Android アプリにしています（パッケージ名 `jp.techgym.kokudo168`）。
@@ -88,7 +94,8 @@ npm run android:open   # Android Studio で開く
 ### 広告の設定
 
 - AdMob のアプリ ID：`android/app/src/main/res/values/strings.xml` の `admob_app_id`
-- 広告ユニット ID：`js/ads.js` の `production`（空欄の種類は本番ビルドで出さない）
+- 広告ユニット ID：`js/ads.js` の `UNITS.android` / `UNITS.ios` の `production`（空欄の種類は本番ビルドで出さない）
+- iOS の AdMob アプリ ID：`ios/App/App/Info.plist` の `GADApplicationIdentifier`
 - 動作確認用 APK はいつも Google のテスト広告。本番の広告は Google Play 用のビルド（`ADMOB_MODE=production`）だけで出る
 
 ## ライセンス
@@ -106,6 +113,7 @@ All rights reserved. 著作権はテックジム株式会社に帰属します�
 - `js/ads.js` / `js/ads-config.js` — Google AdMob 広告（Android アプリのみ）と広告のモード（test / production）
 - `js/build-info.js` — タイトル画面に出すバージョン（ビルド時に生成）
 - `android/` — Android アプリのプロジェクト（Capacitor）
+- `ios/` — iOS アプリのプロジェクト（Capacitor）
 - `assets/` — アプリアイコンと起動画面の元画像
 - `scripts/build-web.js` — Android に同梱する Web ファイルを `www/` にまとめるスクリプト
 

@@ -37,6 +37,6 @@ is not permitted, and this copyright notice must be kept.
 
 Third-party software
 
-The Android app uses Capacitor and @capacitor-community/admob (MIT License), installed
+The Android and iOS apps use Capacitor and @capacitor-community/admob (MIT License), installed
 from npm at build time. The web version loads the "Dela Gothic One" and "Noto Sans JP"
 fonts from Google Fonts (SIL Open Font License 1.1).

@@ -87,11 +87,15 @@
 
   // ---------------------------------------------------------------- 画面
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // ?hires はストア用の画像を撮るとき用（端末の解像度そのままで描く）
+    const hires = /[?&]hires\b/.test(location.search);
+    const dpr = Math.min(window.devicePixelRatio || 1, hires ? 3 : 2);
     const cw = window.innerWidth, ch = window.innerHeight;
     let sc = dpr;
-    if (cw * sc > 1700) sc = 1700 / cw;
-    if (ch * sc > 1100) sc = Math.min(sc, 1100 / ch);
+    if (!hires) {
+      if (cw * sc > 1700) sc = 1700 / cw;
+      if (ch * sc > 1100) sc = Math.min(sc, 1100 / ch);
+    }
     canvas.width = Math.round(cw * sc);
     canvas.height = Math.round(ch * sc);
     canvas.style.width = cw + 'px';
@@ -102,6 +106,7 @@
     HORIZON = H * (portrait ? 0.46 : 0.5);
     PLAYER_SY = H * (portrait ? 0.84 : 0.93);
     PLAYER_Z = DEPTH * CAM_H * S / (PLAYER_SY - HORIZON);
+    G.playerZ = PLAYER_Z;
     vignette = ctx.createRadialGradient(W / 2, H * 0.55, Math.min(W, H) * 0.35, W / 2, H * 0.55, Math.max(W, H) * 0.75);
     vignette.addColorStop(0, 'rgba(0,0,0,0)');
     vignette.addColorStop(1, 'rgba(0,0,0,0.35)');
@@ -904,6 +909,7 @@
       const n = names[i];
       const d = document.createElement('div');
       d.className = 'town';
+      d.dataset.i = i;
       d.style.left = `${(k / track.TOTAL_KM) * 100}%`;
       d.innerHTML = `<i></i><span>${n}</span>`;
       bar.appendChild(d);
