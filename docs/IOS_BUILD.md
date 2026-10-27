@@ -201,7 +201,15 @@ techgymjp は組織ではなく個人のアカウントなので、**このリ�
 | `ASC_ISSUER_ID` | Issuer ID |
 | `ASC_KEY_P8_BASE64` | API キー（.p8）を変換した文字列（`base64 -i AuthKey_XXXXXXXXXX.p8 \| tr -d '\n' \| pbcopy`） |
 
-登録が終わったら、Claude Code に「iOS の自動アップロードのワークフローを作って」と頼みます。
+Secrets は登録済みです。`.github/workflows/ios-release.yml` が、既定ブランチに push するたびに次のことを行います。
+
+1. 本番広告の設定でゲームのファイルをコピーする（`npm run ios:release` と同じ）
+2. 配布用証明書を一時的なキーチェーンに入れ、API キーで署名用のプロファイルを自動で作って Archive する
+3. App Store Connect にアップロードする（10〜30 分ほどで TestFlight に表示される）
+
+- ビルド番号は「100 ＋ Actions の実行回数」（101, 102…）。手元の Mac から上げるビルド（1, 2, 3…）とぶつかりません
+- 手動で実行したいときは、Actions の「iOS release (TestFlight)」→「Run workflow」
+- 審査への提出は、これまでどおり App Store Connect で、TestFlight に届いたビルドを選んで行います
 
 **注意**：証明書（.p12）、そのパスワード、API キー（.p8）は、チャット・AI へのアップロード・リポジトリへのコミットで**絶対に共有しない**でください。
 
