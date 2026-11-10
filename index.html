@@ -72,7 +72,9 @@
       <button id="btnHowto" class="btn" data-i18n="title.howto">遊び方</button>
     </div>
     <p class="lang-sel"><button class="lang-btn" data-lang="ja">日本語</button><button class="lang-btn" data-lang="en">English</button></p>
-    <p class="store-link web-only">📱 <a href="https://play.google.com/store/apps/details?id=jp.techgym.kokudo168" target="_blank" rel="noopener" data-i18n="store.android">Android アプリ版（Google Play）</a></p>
+    <!-- web-only: Web 版だけ。アプリには入れない（scripts/build-web.js の build:app が消す） -->
+    <p class="store-link">📱 <a href="https://play.google.com/store/apps/details?id=jp.techgym.kokudo168" target="_blank" rel="noopener" data-i18n="store.android">Android アプリ版（Google Play）</a></p>
+    <!-- /web-only -->
     <p id="best" class="best"></p>
     <p class="legal">
       <span id="buildInfo"></span>
@@ -108,7 +110,9 @@
       <li>崖やガードレールにこするとガリガリ減速。衝突すると転倒してタイムロス。</li>
       <li>急カーブはスピードを出しすぎると外へ膨らみます。</li>
     </ul>
-    <p class="store-link web-only">📱 <a href="https://play.google.com/store/apps/details?id=jp.techgym.kokudo168" target="_blank" rel="noopener" data-i18n="store.android">Android アプリ版（Google Play）</a></p>
+    <!-- web-only: Web 版だけ。アプリには入れない（scripts/build-web.js の build:app が消す） -->
+    <p class="store-link">📱 <a href="https://play.google.com/store/apps/details?id=jp.techgym.kokudo168" target="_blank" rel="noopener" data-i18n="store.android">Android アプリ版（Google Play）</a></p>
+    <!-- /web-only -->
     <button id="btnHowtoClose" class="btn primary" data-i18n="btn.ok">OK</button>
   </div>
 </section>

@@ -260,5 +260,4 @@ body:has(#touch:not([hidden])) .pause-btn { right: calc(max(12px, env(safe-area-
 .store-link { margin: 12px 0 0; font-size: 14px; font-weight: 700; text-shadow: 0 2px 4px #000; }
 .store-link a { color: #9fe0ff; text-decoration: underline; padding: 6px 4px; }
 .panel .store-link { text-shadow: none; text-align: center; margin: 4px 0 14px; }
-body.native .web-only { display: none; }
 @media (max-height: 500px) { .store-link { margin-top: 4px; font-size: 12px; } }

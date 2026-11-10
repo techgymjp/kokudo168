@@ -14,7 +14,9 @@ const I18N = (() => {
       'title.best': '自己ベスト：ランク{rank}「{title}」 SCORE {score}{time}',
       'legal.privacy': 'プライバシーポリシー',
       'legal.adSettings': '広告の設定',
+      // web-only:start
       'store.android': 'Android アプリ版（Google Play）',
+      // web-only:end
       'url.privacy': 'https://techgym.jp/privacy-policy/',
       'howto.title': '遊び方',
       'howto.steer': 'ハンドル（A / D でもOK）',
@@ -126,7 +128,9 @@ const I18N = (() => {
       'title.best': 'Best: Rank {rank} “{title}”  SCORE {score}{time}',
       'legal.privacy': 'Privacy Policy',
       'legal.adSettings': 'Ad settings',
+      // web-only:start
       'store.android': 'Get the Android app (Google Play)',
+      // web-only:end
       'url.privacy': 'https://techgym.jp/privacy-policy-en/',
       'howto.title': 'How to Play',
       'howto.steer': 'Steer (or A / D)',

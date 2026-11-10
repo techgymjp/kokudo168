@@ -75,7 +75,9 @@
     lastSeg: 0, skyOffset: 0, theme: 'city', themePrev: null, themeFade: 1,
     countdown: 0, goalTimer: 0, scrapeT: 0, rockTimer: 0, result: null,
   };
+  // web-only:start（Web 版だけ。ストア用の画像の撮影に使う。アプリには入れない：scripts/build-web.js が消す）
   window.KOKUDO = G;
+  // web-only:end
 
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -87,12 +89,14 @@
 
   // ---------------------------------------------------------------- 画面
   function resize() {
-    // ?hires はストア用の画像を撮るとき用（端末の解像度そのままで描く）
-    const hires = /[?&]hires\b/.test(location.search);
-    const dpr = Math.min(window.devicePixelRatio || 1, hires ? 3 : 2);
+    let fullRes = false;
+    // web-only:start（?hires はストア用の画像を撮るとき用。端末の解像度そのままで描く）
+    fullRes = /[?&]hires\b/.test(location.search);
+    // web-only:end
+    const dpr = Math.min(window.devicePixelRatio || 1, fullRes ? 3 : 2);
     const cw = window.innerWidth, ch = window.innerHeight;
     let sc = dpr;
-    if (!hires) {
+    if (!fullRes) {
       if (cw * sc > 1700) sc = 1700 / cw;
       if (ch * sc > 1100) sc = Math.min(sc, 1100 / ch);
     }
@@ -1327,22 +1331,25 @@
     Sprites.buildAll();
     track = Route.build();
     segments = track.segments;
+    // web-only:start
     window.KOKUDO_TRACK = track;
+    // web-only:end
     trackLen = segments.length * SEG;
     // 区間ごとの持ち時間（秒）
     track.stages.forEach((s, i) => { s.bonus = Math.round(s.len / (i === 0 ? 40 : 43)) + (i === 0 ? 4 : 0); });
     buildProgressBar();
     bindUi();
     $('loading').hidden = true;
-    const qs = new URLSearchParams(location.search);
     toTitle();
+    // web-only:start（?stage=0〜7 は動作確認用：指定区間から開始）
+    const qs = new URLSearchParams(location.search);
     if (qs.has('stage')) {
-      // デバッグ用：指定区間から開始
       startGame();
       const st = track.stages[clamp(parseInt(qs.get('stage'), 10) || 0, 0, 7)];
       G.position = st.start * SEG; G.stage = track.stages.indexOf(st); G.lastSeg = st.start; G.time = 60;
       initTraffic();
     }
+    // web-only:end
     requestAnimationFrame((t) => { last = t; requestAnimationFrame(frame); });
   }
   boot();

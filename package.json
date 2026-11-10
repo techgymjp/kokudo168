@@ -5,10 +5,11 @@
   "description": "酷道168号の星 国道168号を枚方から新宮まで駆け抜けるバイクレースゲーム（Web / Android / iOS）",
   "scripts": {
     "build": "node scripts/build-web.js",
-    "android:sync": "npm run build && npx cap sync android",
+    "build:app": "APP_BUILD=1 node scripts/build-web.js",
+    "android:sync": "npm run build:app && npx cap sync android",
     "android:open": "npx cap open android",
-    "ios:sync": "npm run build && npx cap sync ios",
-    "ios:release": "ADMOB_MODE=production npm run build && npx cap sync ios",
+    "ios:sync": "npm run build:app && npx cap sync ios",
+    "ios:release": "ADMOB_MODE=production ADMOB_PLATFORM=ios npm run build:app && npx cap sync ios",
     "ios:open": "npx cap open ios"
   },
   "dependencies": {

@@ -204,7 +204,7 @@ techgymjp は組織ではなく個人のアカウントなので、**このリ�
 Secrets は登録済みです。`.github/workflows/ios-release.yml` が、既定ブランチに push するたびに次のことを行います。
 
 1. 本番広告の設定でゲームのファイルをコピーする（`npm run ios:release` と同じ）
-2. 配布用証明書を一時的なキーチェーンに入れ、API キーで署名用のプロファイルを自動で作って Archive する
+2. 配布用証明書を一時的なキーチェーンに入れ、その証明書だけを使う App Store 用のプロファイルを API キーで作って Archive する（Xcode の自動署名は実行のたびに開発用の証明書を作り、上限に達すると失敗するため使わない。`.github/scripts/asc-appstore-profile.mjs`）
 3. App Store Connect にアップロードする（10〜30 分ほどで TestFlight に表示される）
 
 - ビルド番号は「100 ＋ Actions の実行回数」（101, 102…）。手元の Mac から上げるビルド（1, 2, 3…）とぶつかりません
@@ -216,6 +216,15 @@ Secrets は登録済みです。`.github/workflows/ios-release.yml` が、既定
 いまある `.github/workflows/ios.yml` は、push のたびに GitHub の Mac で「署名なしでビルドできるか」だけを確認するものです（App Store には上げません）。
 
 ---
+
+## Web 版だけの部分はアプリに入れない（Guideline 5.6 対策）
+
+Web 版には、Google Play へのリンクや、ストア用の画像の撮影・動作確認用のフック（`?stage=`、`?hires`）があります。
+他社ストアへのリンクとそれをアプリで隠すコードがアプリのバンドルにあると、iOS の審査で「審査中に隠した機能」（Guideline 5.6）と見なされることがあるため、アプリには最初から入れません。
+
+- Web 版だけの部分は目印で囲む（HTML は `<!-- web-only -->` … `<!-- /web-only -->`、JS は `// web-only:start` … `// web-only:end`）
+- `npm run ios:sync` / `ios:release` / `android:sync` と GitHub Actions は `npm run build:app` を使い、目印の範囲を取り除いてからコピーする。Google Play へのリンクなどが残っていたらビルドを止める
+- Web 版の公開（Vercel など）は従来どおり `npm run build`
 
 ## つまずきやすいところ
 

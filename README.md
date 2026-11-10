@@ -117,4 +117,5 @@ All rights reserved. 著作権はテックジム株式会社に帰属します�
 - `assets/` — アプリアイコンと起動画面の元画像
 - `scripts/build-web.js` — Android に同梱する Web ファイルを `www/` にまとめるスクリプト
 
-デバッグ用に `?stage=0`〜`?stage=7` を付けると指定区間から開始できます。
+Web 版では、動作確認用に `?stage=0`〜`?stage=7` を付けると指定区間から開始できます。
+Google Play へのリンクやこうした動作確認用のフックは Web 版だけのもので、アプリ用のビルド（`npm run build:app`）では取り除かれます（`docs/IOS_BUILD.md`）。

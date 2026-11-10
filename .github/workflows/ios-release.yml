@@ -29,6 +29,9 @@ jobs:
     timeout-minutes: 45
     env:
       HAS_SECRETS: ${{ secrets.ASC_KEY_P8_BASE64 != '' && secrets.IOS_DIST_CERT_P12_BASE64 != '' }}
+      TEAM_ID: GNM3VTX9YG
+      BUNDLE_ID: jp.techgym.kokudo168
+      PROFILE_NAME: kokudo168 App Store (GitHub Actions)
       # 手元の Mac から上げたビルド（1, 2, 3…）とぶつからないよう、100 から数える
       BUILD_NUMBER: ${{ github.run_number }}
     steps:
@@ -56,11 +59,11 @@ jobs:
           echo "VERSION_NAME=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
           echo "IOS_BUILD=$((100 + BUILD_NUMBER))" >> "$GITHUB_ENV"
 
-      # 本番の広告 ID でコピーする（npm run ios:release と同じ）。タイトル画面のバージョン表示にもビルド番号を入れる
+      # 本番の広告 ID で、Web 版だけの部分を除いてコピーする（npm run ios:release と同じ）。タイトル画面のバージョン表示にもビルド番号を入れる
       - name: Copy web assets into the iOS project (production ads)
         if: env.HAS_SECRETS == 'true'
         run: |
-          ADMOB_MODE=production VERSION_CODE="$IOS_BUILD" npm run build
+          ADMOB_MODE=production ADMOB_PLATFORM=ios VERSION_CODE="$IOS_BUILD" npm run build:app
           npx cap sync ios
 
       - name: Install the distribution certificate and API key
@@ -76,6 +79,7 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
           echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
           security import "$RUNNER_TEMP/dist.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
@@ -85,35 +89,57 @@ jobs:
           echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$KEY_PATH"
           echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
 
-      # 署名用のプロファイルは、API キーを使って Xcode が自動で作る（-allowProvisioningUpdates）
-      - name: Archive
+      # Xcode の自動署名は、まっさらな GitHub の Mac では実行のたびに開発用の証明書を新しく作り、上限に達すると失敗する。
+      # そこで、登録済みの配布用証明書だけを使う App Store 用のプロファイルを API で作り、App ターゲットだけ手動署名にする
+      - name: Create the App Store provisioning profile
         if: env.HAS_SECRETS == 'true'
-        working-directory: ios/App
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
+          SERIAL=$(security find-certificate -c "Apple Distribution" -p "$KEYCHAIN" | openssl x509 -noout -serial | cut -d= -f2)
+          node .github/scripts/asc-appstore-profile.mjs "$BUNDLE_ID" "$PROFILE_NAME" "$SERIAL"
+          perl -0pi -e 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;\n\t\t\t\tCODE_SIGN_IDENTITY = "Apple Distribution";\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "$ENV{PROFILE_NAME}";/g' ios/App/App.xcodeproj/project.pbxproj
+          test "$(grep -c 'PROVISIONING_PROFILE_SPECIFIER' ios/App/App.xcodeproj/project.pbxproj)" = 2
+
+      - name: Archive
+        if: env.HAS_SECRETS == 'true'
+        run: |
           set -o pipefail
-          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
-            CURRENT_PROJECT_VERSION="$IOS_BUILD" MARKETING_VERSION="$VERSION_NAME" \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            MARKETING_VERSION="$VERSION_NAME" CURRENT_PROJECT_VERSION="$IOS_BUILD" \
             archive | tail -60
 
       - name: Upload to App Store Connect (TestFlight)
         if: env.HAS_SECRETS == 'true'
-        working-directory: ios/App
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
           set -o pipefail
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict><key>${BUNDLE_ID}</key><string>${PROFILE_NAME}</string></dict>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          PLIST
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
-            -exportOptionsPlist ../ExportOptions.plist -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            | tail -60
+            | tail -40
           echo "::notice::v${VERSION_NAME} (build ${IOS_BUILD}) をアップロードしました。10〜30 分ほどで TestFlight に表示されます"
 
       - name: Clean up
