@@ -16,6 +16,7 @@ const I18N = (() => {
       'legal.adSettings': '広告の設定',
       // web-only:start
       'store.android': 'Android アプリ版（Google Play）',
+      'store.ios': 'iPhone アプリ版（App Store）',
       // web-only:end
       'url.privacy': 'https://techgym.jp/privacy-policy/',
       'howto.title': '遊び方',
@@ -130,6 +131,7 @@ const I18N = (() => {
       'legal.adSettings': 'Ad settings',
       // web-only:start
       'store.android': 'Get the Android app (Google Play)',
+      'store.ios': 'Get the iPhone app (App Store)',
       // web-only:end
       'url.privacy': 'https://techgym.jp/privacy-policy-en/',
       'howto.title': 'How to Play',

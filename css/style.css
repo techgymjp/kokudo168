@@ -261,3 +261,6 @@ body:has(#touch:not([hidden])) .pause-btn { right: calc(max(12px, env(safe-area-
 .store-link a { color: #9fe0ff; text-decoration: underline; padding: 6px 4px; }
 .panel .store-link { text-shadow: none; text-align: center; margin: 4px 0 14px; }
 @media (max-height: 500px) { .store-link { margin-top: 4px; font-size: 12px; } }
+/* 2 つ目のストアのリンクは間を詰める */
+.store-link.store-link-next { margin-top: 2px; }
+.panel .store-link.store-link-next { margin-top: -10px; }
