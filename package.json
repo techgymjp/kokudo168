@@ -1,6 +1,6 @@
 {
   "name": "kokudo168",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "酷道168号の星 国道168号を枚方から新宮まで駆け抜けるバイクレースゲーム（Web / Android / iOS）",
   "scripts": {

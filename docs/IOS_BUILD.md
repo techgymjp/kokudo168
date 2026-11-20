@@ -112,7 +112,7 @@ npm run ios:release   # 本番の広告 ID でコピーする（ここが ios:sy
 npm run ios:open
 ```
 
-1. Xcode の左で「App」→「General」→「Identity」を開き、**Build の番号を前回より大きくする**（初回は 1。アップロードのたびに 2、3…と上げる。同じ番号は二度アップロードできない）。Version は `1.0.0`
+1. Xcode の左で「App」→「General」→「Identity」を開き、**Build の番号を前回より大きくする**（初回は 1。アップロードのたびに 2、3…と上げる。同じ番号は二度アップロードできない）。Version は `package.json` の version（いまは `1.0.1`）
 2. 上部の実行先を「**Any iOS Device (arm64)**」にする
 3. メニューの「Product」→「**Archive**」（メニューバーが見えないときは、マウスを画面の上端に動かす）
 4. 終わると Organizer が開くので、「**Distribute App**」→「**App Store Connect**」→「Upload」で進める（途中の確認は既定のまま「Next」でよい。「Xcode Cloud can automate…」は「Remind Me Later」で閉じる）
@@ -131,7 +131,7 @@ npm run ios:open
 
 ## 5. App Store Connect で審査に出す
 
-「配信」タブ（iOS App のバージョン）で入力します。**バージョンは `1.0.0`** にしてください（「1.0」のままだと、アップロードしたビルドが選べません）。
+「配信」タブ（iOS App のバージョン）で入力します。**バージョンはアプリの Version と同じ番号**（初回は `1.0.0`、いまは `1.0.1`）にしてください（違う番号だと、アップロードしたビルドが選べません）。
 
 | 項目 | 入力内容 |
 | --- | --- |
@@ -231,7 +231,8 @@ Web 版には、Google Play へのリンクや、ストア用の画像の撮影�
 | 症状 | 対処 |
 | --- | --- |
 | アップロードで「同じビルド番号がすでにある」 | General の Build の番号を上げてから Archive し直す |
-| アップロードしたビルドが選べない | App Store Connect のバージョンを `1.0.0` に直して保存する |
+| アップロードしたビルドが選べない | App Store Connect のバージョンを、アプリの Version（`package.json` の version）と同じ番号にして保存する |
+| アップロードで「must contain a higher version than that of the previously approved version」 | 承認済みのバージョンと同じ番号では上げられない。`package.json` の version と Xcode の MARKETING_VERSION を上げる（例：1.0.0 → 1.0.1） |
 | Signing でエラー（チームが選べない、証明書がない） | Xcode の Accounts で Apple ID にサインインし直し、Team に自分のチームを選ぶ。「Automatically manage signing」をオンにする |
 | 実行先に iPhone が出ない | ケーブルをつなぎ直し、iPhone で「信頼」を許可。デベロッパモードをオンにする |
 | 実行先に「iOS 26.x Not Installed」 | 「Get」で iOS の部品をダウンロードする（8 GB ほど。Archive にも必要） |
